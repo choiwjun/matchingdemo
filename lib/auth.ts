@@ -108,6 +108,18 @@ export const authOptions: NextAuthOptions = {
         error: '/auth/login',
     },
     callbacks: {
+        async redirect({ url, baseUrl }) {
+            // 같은 사이트 내 URL이면 그대로 사용
+            if (url.startsWith('/')) {
+                return `${baseUrl}${url}`;
+            }
+            // 같은 origin이면 그대로 사용
+            if (url.startsWith(baseUrl)) {
+                return url;
+            }
+            // 기본적으로 dashboard로 리다이렉트
+            return `${baseUrl}/dashboard`;
+        },
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;

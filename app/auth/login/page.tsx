@@ -19,6 +19,7 @@ function LoginForm() {
     const [error, setError] = useState('');
 
     const registered = searchParams.get('registered');
+    const errorParam = searchParams.get('error');
     const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
     const {
@@ -26,6 +27,11 @@ function LoginForm() {
         handleSubmit,
         formState: { errors },
     } = useForm<LoginFormData>();
+
+    const handleLoginSuccess = async () => {
+        // 강제로 페이지를 새로고침하여 세션 상태를 갱신
+        window.location.href = callbackUrl;
+    };
 
     const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true);
@@ -40,18 +46,49 @@ function LoginForm() {
 
             if (result?.error) {
                 setError('メールアドレスまたはパスワードが正しくありません。');
+                setIsLoading(false);
+            } else if (result?.ok) {
+                await handleLoginSuccess();
             } else {
-                router.push(callbackUrl);
-                router.refresh();
+                setError('ログインに失敗しました。');
+                setIsLoading(false);
             }
-        } catch {
+        } catch (e) {
+            console.error('Login error:', e);
             setError('ログイン中にエラーが発生いたしました。');
-        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDemoLogin = async () => {
+        setIsLoading(true);
+        setError('');
+        
+        try {
+            const result = await signIn('credentials', {
+                email: 'demo@example.com',
+                password: 'demo',
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError('デモログインに失敗しました。データベース接続を確認してください。');
+                setIsLoading(false);
+            } else if (result?.ok) {
+                await handleLoginSuccess();
+            } else {
+                setError('デモログインに失敗しました。');
+                setIsLoading(false);
+            }
+        } catch (e) {
+            console.error('Demo login error:', e);
+            setError('予期せぬエラーが発生しました。');
             setIsLoading(false);
         }
     };
 
     const handleSocialLogin = async (provider: string) => {
+        setIsLoading(true);
         await signIn(provider, { callbackUrl });
     };
 
@@ -72,6 +109,13 @@ function LoginForm() {
                     {registered && (
                         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
                             会員登録が完了いたしました。ログインしてください。
+                        </div>
+                    )}
+
+                    {/* Session Error Message */}
+                    {errorParam === 'session' && (
+                        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                            セッションが切れました。再度ログインしてください。
                         </div>
                     )}
 
@@ -118,7 +162,7 @@ function LoginForm() {
                         </div>
 
                         <Button type="submit" fullWidth isLoading={isLoading}>
-                            ログイン
+                            {isLoading ? 'ログイン中...' : 'ログイン'}
                         </Button>
                     </form>
 
@@ -128,33 +172,11 @@ function LoginForm() {
                             type="button"
                             variant="outline"
                             fullWidth
-                            onClick={async () => {
-                                setIsLoading(true);
-                                setError('');
-                                try {
-                                    const result = await signIn('credentials', {
-                                        email: 'demo@example.com',
-                                        password: 'demo',
-                                        redirect: false,
-                                        callbackUrl,
-                                    });
-
-                                    if (result?.error) {
-                                        setError('デモログインに失敗しました。データベース接続を確認してください。');
-                                    } else {
-                                        router.push(callbackUrl);
-                                        router.refresh();
-                                    }
-                                } catch (e) {
-                                    setError('予期せぬエラーが発生しました。');
-                                    console.error(e);
-                                } finally {
-                                    setIsLoading(false);
-                                }
-                            }}
+                            onClick={handleDemoLogin}
+                            disabled={isLoading}
                             className="border-primary-600 text-primary-600 hover:bg-primary-50"
                         >
-                            デモアカウントでログイン (入力不要)
+                            {isLoading ? '処理中...' : 'デモアカウントでログイン (入力不要)'}
                         </Button>
                     </div>
 
@@ -172,7 +194,8 @@ function LoginForm() {
                         <button
                             type="button"
                             onClick={() => handleSocialLogin('google')}
-                            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            disabled={isLoading}
+                            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -185,7 +208,8 @@ function LoginForm() {
                         <button
                             type="button"
                             onClick={() => handleSocialLogin('apple')}
-                            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+                            disabled={isLoading}
+                            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors disabled:opacity-50"
                         >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
