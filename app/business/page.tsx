@@ -5,6 +5,16 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
+// Helper to parse JSON arrays safely
+const parseJsonArray = (value: string | null): string[] => {
+    if (!value) return [];
+    try {
+        return JSON.parse(value);
+    } catch {
+        return [];
+    }
+};
+
 export default async function BusinessDashboardPage() {
     const session = await getServerSession(authOptions);
 
@@ -306,17 +316,17 @@ export default async function BusinessDashboardPage() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">ポートフォリオ</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                                        businessProfile.portfolioImages.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        parseJsonArray(businessProfile.portfolioImages).length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.portfolioImages.length > 0 ? `${businessProfile.portfolioImages.length}件登録` : '未登録'}
+                                        {parseJsonArray(businessProfile.portfolioImages).length > 0 ? `${parseJsonArray(businessProfile.portfolioImages).length}件登録` : '未登録'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">対応エリア</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                                        businessProfile.serviceAreas.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        parseJsonArray(businessProfile.serviceAreas).length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.serviceAreas.length > 0 ? `${businessProfile.serviceAreas.length}エリア` : '未設定'}
+                                        {parseJsonArray(businessProfile.serviceAreas).length > 0 ? `${parseJsonArray(businessProfile.serviceAreas).length}エリア` : '未設定'}
                                     </span>
                                 </div>
                             </div>
