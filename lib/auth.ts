@@ -1,12 +1,26 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-// NEXTAUTH_SECRET이 없으면 경고 (프로덕션에서는 필수)
+// NEXTAUTH_SECRET이 없으면 경고
 if (!process.env.NEXTAUTH_SECRET) {
-    console.warn('⚠️ NEXTAUTH_SECRET is not set. Please set it in environment variables.');
+    console.warn('⚠️ NEXTAUTH_SECRET is not set.');
+}
+
+// DATABASE_URL이 없으면 경고
+if (!process.env.DATABASE_URL) {
+    console.warn('⚠️ DATABASE_URL is not set. Only demo login will work.');
+}
+
+// Prisma는 DATABASE_URL이 있을 때만 import
+let prisma: any = null;
+async function getPrisma() {
+    if (!prisma && process.env.DATABASE_URL) {
+        const { prisma: prismaClient } = await import('@/lib/prisma');
+        prisma = prismaClient;
+    }
+    return prisma;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -19,48 +33,82 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
+                    console.log('Missing credentials');
+                    return null;
+                }
+
+                console.log('Login attempt for:', credentials.email);
+
+                // Demo User - DB 없이도 동작
+                if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
+                    console.log('Demo login successful');
+                    
+                    // DB가 있으면 사용자 생성/조회 시도
+                    if (process.env.DATABASE_URL) {
+                        try {
+                            const db = await getPrisma();
+                            if (db) {
+                                let user = await db.user.findUnique({
+                                    where: { email: 'demo@example.com' },
+                                });
+
+                                if (!user) {
+                                    const hashedPassword = await bcrypt.hash('demo', 12);
+                                    user = await db.user.create({
+                                        data: {
+                                            email: 'demo@example.com',
+                                            password: hashedPassword,
+                                            role: 'USER',
+                                            profile: {
+                                                create: {
+                                                    firstName: 'Demo',
+                                                    lastName: 'User',
+                                                    region: 'tokyo',
+                                                    interests: '[]',
+                                                },
+                                            },
+                                        },
+                                    });
+                                }
+
+                                return {
+                                    id: user.id,
+                                    email: user.email,
+                                    role: user.role,
+                                };
+                            }
+                        } catch (error) {
+                            console.error('DB error for demo user:', error);
+                        }
+                    }
+                    
+                    // DB 없으면 하드코딩된 데모 사용자 반환
+                    return {
+                        id: 'demo-user-id',
+                        email: 'demo@example.com',
+                        role: 'USER',
+                    };
+                }
+
+                // 일반 사용자 로그인 - DB 필요
+                if (!process.env.DATABASE_URL) {
+                    console.log('No DATABASE_URL, only demo login available');
                     return null;
                 }
 
                 try {
-                    // Demo User Logic
-                    if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
-                        let user = await prisma.user.findUnique({
-                            where: { email: 'demo@example.com' },
-                        });
-
-                        if (!user) {
-                            const hashedPassword = await bcrypt.hash('demo', 12);
-                            user = await prisma.user.create({
-                                data: {
-                                    email: 'demo@example.com',
-                                    password: hashedPassword,
-                                    role: 'USER',
-                                    profile: {
-                                        create: {
-                                            firstName: 'Demo',
-                                            lastName: 'User',
-                                            region: 'tokyo',
-                                            interests: '[]',
-                                        },
-                                    },
-                                },
-                            });
-                        }
-
-                        return {
-                            id: user.id,
-                            email: user.email,
-                            role: user.role,
-                        };
+                    const db = await getPrisma();
+                    if (!db) {
+                        console.log('Prisma client not available');
+                        return null;
                     }
 
-                    // Regular user login
-                    const user = await prisma.user.findUnique({
+                    const user = await db.user.findUnique({
                         where: { email: credentials.email },
                     });
 
                     if (!user || !user.password) {
+                        console.log('User not found:', credentials.email);
                         return null;
                     }
 
@@ -70,9 +118,11 @@ export const authOptions: NextAuthOptions = {
                     );
 
                     if (!isPasswordValid) {
+                        console.log('Invalid password for:', credentials.email);
                         return null;
                     }
 
+                    console.log('Login successful for:', credentials.email);
                     return {
                         id: user.id,
                         email: user.email,
@@ -84,7 +134,7 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
-        // Google OAuth (환경변수가 있을 때만 활성화)
+        // Google OAuth
         ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
             ? [
                 GoogleProvider({
@@ -127,7 +177,6 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
-    // secret이 없으면 기본값 사용 (개발용, 프로덕션에서는 반드시 설정 필요)
     secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only',
-    debug: process.env.NODE_ENV === 'development',
+    debug: true, // 디버그 활성화
 };
