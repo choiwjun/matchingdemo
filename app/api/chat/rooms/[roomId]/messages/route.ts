@@ -3,6 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// Helper to parse JSON arrays safely
+const parseJsonArray = (value: string | null | undefined): string[] => {
+    if (!value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
 interface RouteParams {
     params: Promise<{ roomId: string }>;
 }
@@ -14,7 +25,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
         if (!session) {
             return NextResponse.json(
-                { error: '로그인이 필요합니다.' },
+                { error: 'ログインが必要です。' },
                 { status: 401 }
             );
         }
@@ -24,9 +35,10 @@ export async function GET(request: Request, { params }: RouteParams) {
             where: { id: roomId },
         });
 
-        if (!room || !room.userIds.includes(session.user.id)) {
+        const roomUserIds = parseJsonArray(room?.userIds);
+        if (!room || !roomUserIds.includes(session.user.id)) {
             return NextResponse.json(
-                { error: '채팅방에 접근할 수 없습니다.' },
+                { error: 'チャットルームにアクセスできません。' },
                 { status: 403 }
             );
         }
@@ -58,7 +70,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     } catch (error) {
         console.error('Error fetching messages:', error);
         return NextResponse.json(
-            { error: '메시지 조회 중 오류가 발생했습니다.' },
+            { error: 'メッセージの取得中にエラーが発生しました。' },
             { status: 500 }
         );
     }
@@ -71,7 +83,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
         if (!session) {
             return NextResponse.json(
-                { error: '로그인이 필요합니다.' },
+                { error: 'ログインが必要です。' },
                 { status: 401 }
             );
         }
@@ -81,9 +93,10 @@ export async function POST(request: Request, { params }: RouteParams) {
             where: { id: roomId },
         });
 
-        if (!room || !room.userIds.includes(session.user.id)) {
+        const roomUserIds = parseJsonArray(room?.userIds);
+        if (!room || !roomUserIds.includes(session.user.id)) {
             return NextResponse.json(
-                { error: '채팅방에 접근할 수 없습니다.' },
+                { error: 'チャットルームにアクセスできません。' },
                 { status: 403 }
             );
         }
@@ -104,7 +117,7 @@ export async function POST(request: Request, { params }: RouteParams) {
                 fileName = file.name;
                 fileSize = file.size;
                 // fileUrl = await uploadFile(file);
-                content = `[파일] ${fileName}`;
+                content = `[ファイル] ${fileName}`;
             }
         } else {
             const body = await request.json();
@@ -113,7 +126,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
         if (!content && !fileUrl) {
             return NextResponse.json(
-                { error: '메시지 내용이 필요합니다.' },
+                { error: 'メッセージ内容が必要です。' },
                 { status: 400 }
             );
         }
@@ -144,22 +157,24 @@ export async function POST(request: Request, { params }: RouteParams) {
         });
 
         // Create notification for other users
-        const otherUserIds = room.userIds.filter((id) => id !== session.user.id);
-        await prisma.notification.createMany({
-            data: otherUserIds.map((userId) => ({
-                userId,
-                type: 'NEW_MESSAGE' as const,
-                title: '새 메시지',
-                message: content.length > 50 ? content.slice(0, 50) + '...' : content,
-                link: `/chat?roomId=${roomId}`,
-            })),
-        });
+        const otherUserIds = roomUserIds.filter((id) => id !== session.user.id);
+        if (otherUserIds.length > 0) {
+            await prisma.notification.createMany({
+                data: otherUserIds.map((userId) => ({
+                    userId,
+                    type: 'NEW_MESSAGE',
+                    title: '新しいメッセージ',
+                    message: content.length > 50 ? content.slice(0, 50) + '...' : content,
+                    link: `/chat?roomId=${roomId}`,
+                })),
+            });
+        }
 
         return NextResponse.json(message, { status: 201 });
     } catch (error) {
         console.error('Error sending message:', error);
         return NextResponse.json(
-            { error: '메시지 전송 중 오류가 발생했습니다.' },
+            { error: 'メッセージの送信中にエラーが発生しました。' },
             { status: 500 }
         );
     }

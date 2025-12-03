@@ -8,6 +8,17 @@ import Image from 'next/image';
 import { Button, Input, Textarea, FileUpload } from '@/components/ui';
 import { PROJECT_STATUS_LABELS } from '@/lib/constants';
 
+// Helper to parse JSON arrays safely
+const parseJsonArray = (value: string | null | undefined): string[] => {
+    if (!value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
 interface Project {
     id: string;
     title: string;
@@ -16,8 +27,8 @@ interface Project {
     location: string;
     budgetMin?: number;
     budgetMax?: number;
-    images: string[];
-    attachments: string[];
+    images: string | null;
+    attachments: string | null;
     deadline?: string;
     status: string;
     createdAt: string;
@@ -235,11 +246,11 @@ export default function BusinessProjectDetailPage({ params }: PageProps) {
                     </div>
 
                     {/* Images */}
-                    {project.images.length > 0 && (
+                    {parseJsonArray(project.images).length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">첨부 사진</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {project.images.map((image, index) => (
+                                {parseJsonArray(project.images).map((image, index) => (
                                     <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                                         <Image
                                             src={image}
@@ -255,11 +266,11 @@ export default function BusinessProjectDetailPage({ params }: PageProps) {
                     )}
 
                     {/* Attachments */}
-                    {project.attachments.length > 0 && (
+                    {parseJsonArray(project.attachments).length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">첨부 파일</h2>
                             <ul className="space-y-2">
-                                {project.attachments.map((attachment, index) => (
+                                {parseJsonArray(project.attachments).map((attachment, index) => (
                                     <li key={index}>
                                         <a
                                             href={attachment}

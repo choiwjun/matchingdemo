@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { parseJsonArray } from '@/lib/utils';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -125,11 +126,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                     </div>
 
                     {/* Images */}
-                    {project.images.length > 0 && (
+                    {parseJsonArray(project.images).length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">첨부 사진</h2>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {project.images.map((image, index) => (
+                                {parseJsonArray(project.images).map((image, index) => (
                                     <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                                         <Image
                                             src={image}

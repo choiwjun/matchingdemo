@@ -45,7 +45,7 @@ export async function POST(request: Request) {
                         firstName,
                         lastName,
                         region,
-                        interests: interests || [],
+                        interests: JSON.stringify(interests || []),
                     },
                 },
                 ...(role === 'BUSINESS' && {
@@ -53,9 +53,9 @@ export async function POST(request: Request) {
                         create: {
                             companyName: companyName || '',
                             businessNumber,
-                            categories: interests || [],
-                            serviceAreas: region ? [region] : [],
-                            portfolioImages: [],
+                            categories: JSON.stringify(interests || []),
+                            serviceAreas: JSON.stringify(region ? [region] : []),
+                            portfolioImages: JSON.stringify([]),
                         },
                     },
                 }),

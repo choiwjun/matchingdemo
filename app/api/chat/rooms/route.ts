@@ -3,35 +3,49 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// Helper to parse JSON arrays safely
+const parseJsonArray = (value: string | null | undefined): string[] => {
+    if (!value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 
         if (!session) {
             return NextResponse.json(
-                { error: '로그인이 필요합니다.' },
+                { error: 'ログインが必要です。' },
                 { status: 401 }
             );
         }
 
-        const rooms = await prisma.chatRoom.findMany({
-            where: {
-                userIds: {
-                    has: session.user.id,
-                },
-            },
+        // SQLite doesn't support array contains, so we fetch all and filter
+        const allRooms = await prisma.chatRoom.findMany({
             orderBy: {
                 lastMessageAt: 'desc',
             },
         });
 
+        // Filter rooms where user is a participant
+        const rooms = allRooms.filter(room => {
+            const userIds = parseJsonArray(room.userIds);
+            return userIds.includes(session.user.id);
+        });
+
         // Get participants and last messages for each room
         const roomsWithDetails = await Promise.all(
             rooms.map(async (room) => {
+                const userIds = parseJsonArray(room.userIds);
                 const participants = await prisma.user.findMany({
                     where: {
                         id: {
-                            in: room.userIds,
+                            in: userIds,
                         },
                     },
                     include: {
@@ -55,6 +69,7 @@ export async function GET() {
 
                 return {
                     ...room,
+                    userIds, // Return as array
                     participants,
                     lastMessage,
                     unreadCount,
@@ -66,7 +81,7 @@ export async function GET() {
     } catch (error) {
         console.error('Error fetching chat rooms:', error);
         return NextResponse.json(
-            { error: '채팅방 조회 중 오류가 발생했습니다.' },
+            { error: 'チャットルームの取得中にエラーが発生しました。' },
             { status: 500 }
         );
     }
@@ -78,7 +93,7 @@ export async function POST(request: Request) {
 
         if (!session) {
             return NextResponse.json(
-                { error: '로그인이 필요합니다.' },
+                { error: 'ログインが必要です。' },
                 { status: 401 }
             );
         }
@@ -87,25 +102,23 @@ export async function POST(request: Request) {
 
         if (!participantId) {
             return NextResponse.json(
-                { error: '참가자 ID가 필요합니다.' },
+                { error: '参加者IDが必要です。' },
                 { status: 400 }
             );
         }
 
-        // Check if room already exists
-        const existingRoom = await prisma.chatRoom.findFirst({
-            where: {
-                AND: [
-                    { userIds: { has: session.user.id } },
-                    { userIds: { has: participantId } },
-                ],
-            },
+        // Check if room already exists - fetch all and filter
+        const allRooms = await prisma.chatRoom.findMany();
+        const existingRoom = allRooms.find(room => {
+            const userIds = parseJsonArray(room.userIds);
+            return userIds.includes(session.user.id) && userIds.includes(participantId);
         });
 
         if (existingRoom) {
+            const userIds = parseJsonArray(existingRoom.userIds);
             const participants = await prisma.user.findMany({
                 where: {
-                    id: { in: existingRoom.userIds },
+                    id: { in: userIds },
                 },
                 include: {
                     profile: true,
@@ -115,20 +128,21 @@ export async function POST(request: Request) {
 
             return NextResponse.json({
                 ...existingRoom,
+                userIds,
                 participants,
             });
         }
 
-        // Create new room
+        // Create new room with JSON stringified userIds
         const newRoom = await prisma.chatRoom.create({
             data: {
-                userIds: [session.user.id, participantId],
+                userIds: JSON.stringify([session.user.id, participantId]),
             },
         });
 
         const participants = await prisma.user.findMany({
             where: {
-                id: { in: newRoom.userIds },
+                id: { in: [session.user.id, participantId] },
             },
             include: {
                 profile: true,
@@ -138,12 +152,13 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             ...newRoom,
+            userIds: [session.user.id, participantId],
             participants,
         }, { status: 201 });
     } catch (error) {
         console.error('Error creating chat room:', error);
         return NextResponse.json(
-            { error: '채팅방 생성 중 오류가 발생했습니다.' },
+            { error: 'チャットルームの作成中にエラーが発生しました。' },
             { status: 500 }
         );
     }

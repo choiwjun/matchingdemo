@@ -1,54 +1,45 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+// Helper to parse JSON arrays safely from SQLite string fields
+export const parseJsonArray = <T = string>(value: string | null | undefined): T[] => {
+    if (!value) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
 
-export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
+// Helper to stringify array for SQLite storage
+export const stringifyArray = (arr: unknown[]): string => {
+    return JSON.stringify(arr || []);
+};
 
-export function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('ko-KR', {
+// Format currency in Japanese Yen
+export const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('ja-JP', {
         style: 'currency',
-        currency: 'KRW',
+        currency: 'JPY',
     }).format(amount);
-}
+};
 
-export function formatDate(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return new Intl.DateTimeFormat('ko-KR', {
+// Format date in Japanese format
+export const formatDate = (dateString: string | Date): string => {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return date.toLocaleDateString('ja-JP', {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
-    }).format(d);
-}
+    });
+};
 
-export function formatRelativeTime(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-        return '방금 전';
-    }
-
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-        return `${diffInMinutes}분 전`;
-    }
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-        return `${diffInHours}시간 전`;
-    }
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) {
-        return `${diffInDays}일 전`;
-    }
-
-    return formatDate(d);
-}
-
-export function truncate(str: string, length: number): string {
-    if (str.length <= length) return str;
-    return str.slice(0, length) + '...';
-}
+// Format datetime in Japanese format
+export const formatDateTime = (dateString: string | Date): string => {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return date.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
