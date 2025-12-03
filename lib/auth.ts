@@ -14,7 +14,7 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error('이메일과 비밀번호를 입력해주세요.');
+                    throw new Error('メールアドレスとパスワードを入力してください。');
                 }
 
                 // Demo User Logic
@@ -50,49 +50,62 @@ export const authOptions: NextAuthOptions = {
                         };
                     } catch (error) {
                         console.error('Demo login error:', error);
-                        // Fallback to normal login flow if DB fails (though likely will fail there too)
+                        throw new Error('デモログインに失敗しました。データベース接続を確認してください。');
                     }
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
-                    include: {
-                        profile: true,
-                        businessProfile: true,
-                    },
-                });
+                try {
+                    const user = await prisma.user.findUnique({
+                        where: { email: credentials.email },
+                        include: {
+                            profile: true,
+                            businessProfile: true,
+                        },
+                    });
 
-                if (!user || !user.password) {
-                    throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+                    if (!user || !user.password) {
+                        throw new Error('メールアドレスまたはパスワードが正しくありません。');
+                    }
+
+                    const isPasswordValid = await bcrypt.compare(
+                        credentials.password,
+                        user.password
+                    );
+
+                    if (!isPasswordValid) {
+                        throw new Error('メールアドレスまたはパスワードが正しくありません。');
+                    }
+
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role,
+                    };
+                } catch (error) {
+                    if (error instanceof Error) {
+                        throw error;
+                    }
+                    throw new Error('ログイン処理中にエラーが発生しました。');
                 }
-
-                const isPasswordValid = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isPasswordValid) {
-                    throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
-                }
-
-                return {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role,
-                };
             },
         }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID || '',
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-        }),
+        // Google OAuth (환경변수가 있을 때만 활성화)
+        ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+            ? [
+                GoogleProvider({
+                    clientId: process.env.GOOGLE_CLIENT_ID,
+                    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                }),
+            ]
+            : []),
     ],
     session: {
         strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     pages: {
         signIn: '/auth/login',
-        error: '/auth/error',
+        error: '/auth/login',
     },
     callbacks: {
         async jwt({ token, user }) {
@@ -111,4 +124,5 @@ export const authOptions: NextAuthOptions = {
         },
     },
     secret: process.env.NEXTAUTH_SECRET,
+    debug: process.env.NODE_ENV === 'development',
 };
