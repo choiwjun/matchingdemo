@@ -17,9 +17,9 @@ export const authOptions: NextAuthOptions = {
                     throw new Error('メールアドレスとパスワードを入力してください。');
                 }
 
-                // Demo User Logic
-                if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
-                    try {
+                try {
+                    // Demo User Logic
+                    if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
                         let user = await prisma.user.findUnique({
                             where: { email: 'demo@example.com' },
                         });
@@ -48,19 +48,11 @@ export const authOptions: NextAuthOptions = {
                             email: user.email,
                             role: user.role,
                         };
-                    } catch (error) {
-                        console.error('Demo login error:', error);
-                        throw new Error('デモログインに失敗しました。データベース接続を確認してください。');
                     }
-                }
 
-                try {
+                    // Regular user login
                     const user = await prisma.user.findUnique({
                         where: { email: credentials.email },
-                        include: {
-                            profile: true,
-                            businessProfile: true,
-                        },
                     });
 
                     if (!user || !user.password) {
@@ -82,10 +74,11 @@ export const authOptions: NextAuthOptions = {
                         role: user.role,
                     };
                 } catch (error) {
-                    if (error instanceof Error) {
+                    console.error('Auth error:', error);
+                    if (error instanceof Error && error.message.includes('メール')) {
                         throw error;
                     }
-                    throw new Error('ログイン処理中にエラーが発生しました。');
+                    throw new Error('ログイン処理中にエラーが発生しました。データベース接続を確認してください。');
                 }
             },
         }),
@@ -109,15 +102,12 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async redirect({ url, baseUrl }) {
-            // 같은 사이트 내 URL이면 그대로 사용
             if (url.startsWith('/')) {
                 return `${baseUrl}${url}`;
             }
-            // 같은 origin이면 그대로 사용
             if (url.startsWith(baseUrl)) {
                 return url;
             }
-            // 기본적으로 dashboard로 리다이렉트
             return `${baseUrl}/dashboard`;
         },
         async jwt({ token, user }) {
