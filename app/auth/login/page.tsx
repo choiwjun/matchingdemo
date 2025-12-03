@@ -39,13 +39,13 @@ function LoginForm() {
             });
 
             if (result?.error) {
-                setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+                setError('メールアドレスまたはパスワードが正しくありません。');
             } else {
                 router.push(callbackUrl);
                 router.refresh();
             }
         } catch {
-            setError('로그인 중 오류가 발생했습니다.');
+            setError('ログイン中にエラーが発生いたしました。');
         } finally {
             setIsLoading(false);
         }
@@ -64,14 +64,14 @@ function LoginForm() {
                         <Link href="/" className="inline-block mb-4">
                             <h1 className="text-3xl font-bold text-primary-600">Marketplace</h1>
                         </Link>
-                        <h2 className="text-xl font-semibold text-gray-900">로그인</h2>
-                        <p className="text-gray-600 mt-1">계정에 로그인하세요</p>
+                        <h2 className="text-xl font-semibold text-gray-900">ログイン</h2>
+                        <p className="text-gray-600 mt-1">アカウントにログインしてください</p>
                     </div>
 
                     {/* Success Message */}
                     {registered && (
                         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                            회원가입이 완료되었습니다. 로그인해주세요.
+                            会員登録が完了いたしました。ログインしてください。
                         </div>
                     )}
 
@@ -84,14 +84,14 @@ function LoginForm() {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <Input
-                            label="이메일"
+                            label="メールアドレス"
                             type="email"
                             placeholder="example@email.com"
                             {...register('email', {
-                                required: '이메일을 입력해주세요.',
+                                required: 'メールアドレスを入力してください。',
                                 pattern: {
                                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                    message: '유효한 이메일 주소를 입력해주세요.',
+                                    message: '有効なメールアドレスを入力してください。',
                                 },
                             })}
                             error={errors.email?.message}
@@ -99,11 +99,11 @@ function LoginForm() {
 
                         <div>
                             <Input
-                                label="비밀번호"
+                                label="パスワード"
                                 type="password"
-                                placeholder="비밀번호 입력"
+                                placeholder="パスワードを入力"
                                 {...register('password', {
-                                    required: '비밀번호를 입력해주세요.',
+                                    required: 'パスワードを入力してください。',
                                 })}
                                 error={errors.password?.message}
                             />
@@ -112,13 +112,13 @@ function LoginForm() {
                                     href="/auth/forgot-password"
                                     className="text-sm text-primary-600 hover:text-primary-500"
                                 >
-                                    비밀번호를 잊으셨나요?
+                                    パスワードをお忘れですか？
                                 </Link>
                             </div>
                         </div>
 
                         <Button type="submit" fullWidth isLoading={isLoading}>
-                            로그인
+                            ログイン
                         </Button>
                     </form>
 
@@ -128,7 +128,7 @@ function LoginForm() {
                             <div className="w-full border-t border-gray-200"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-gray-500">또는</span>
+                            <span className="px-4 bg-white text-gray-500">または</span>
                         </div>
                     </div>
 
@@ -144,7 +144,7 @@ function LoginForm() {
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                             </svg>
-                            Google로 계속하기
+                            Googleで続ける
                         </button>
                         <button
                             type="button"
@@ -154,15 +154,15 @@ function LoginForm() {
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                             </svg>
-                            Apple로 계속하기
+                            Appleで続ける
                         </button>
                     </div>
 
                     {/* Register Link */}
                     <p className="mt-8 text-center text-sm text-gray-600">
-                        계정이 없으신가요?{' '}
+                        アカウントをお持ちでないですか？{' '}
                         <Link href="/auth/register" className="font-medium text-primary-600 hover:text-primary-500">
-                            회원가입
+                            新規登録
                         </Link>
                     </p>
                 </div>

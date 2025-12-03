@@ -72,19 +72,19 @@ export default async function BusinessDashboardPage() {
                             <Link href="/" className="text-xl font-bold text-primary-600">Marketplace</Link>
                             <div className="hidden md:flex gap-1">
                                 <Link href="/business" className="flex items-center gap-2 px-3 py-2 text-primary-600 bg-primary-50 rounded-lg">
-                                    대시보드
+                                    ダッシュボード
                                 </Link>
                                 <Link href="/business/projects" className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                                    프로젝트 찾기
+                                    案件を探す
                                 </Link>
                                 <Link href="/business/proposals" className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                                    내 제안
+                                    提案履歴
                                 </Link>
                                 <Link href="/business/contracts" className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                                    계약 관리
+                                    契約管理
                                 </Link>
                                 <Link href="/chat" className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                                    채팅
+                                    チャット
                                 </Link>
                             </div>
                         </div>
@@ -107,10 +107,10 @@ export default async function BusinessDashboardPage() {
                     {/* Welcome Section */}
                     <div className="bg-gradient-to-r from-secondary-600 to-primary-600 rounded-2xl p-8 text-white">
                         <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                            {businessProfile?.companyName || '사업자'} 님, 안녕하세요! 👋
+                            {businessProfile?.companyName || '事業者'} 様、ようこそ！ 👋
                         </h1>
                         <p className="text-secondary-100 mb-6">
-                            새로운 프로젝트에 제안하고 비즈니스를 성장시키세요.
+                            新しい案件にご提案いただき、ビジネスを成長させましょう。
                         </p>
                         <Link
                             href="/business/projects"
@@ -119,7 +119,7 @@ export default async function BusinessDashboardPage() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            프로젝트 찾기
+                            案件を探す
                         </Link>
                     </div>
 
@@ -131,12 +131,12 @@ export default async function BusinessDashboardPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                                 <div>
-                                    <h3 className="font-medium text-yellow-900">사업자 인증이 필요합니다</h3>
+                                    <h3 className="font-medium text-yellow-900">事業者認証が必要です</h3>
                                     <p className="text-sm text-yellow-700 mt-1">
-                                        사업자 인증을 완료하면 더 많은 프로젝트에 제안할 수 있고, 고객 신뢰도가 높아집니다.
+                                        事業者認証を完了すると、より多くの案件にご提案でき、お客様からの信頼度も向上いたします。
                                     </p>
                                     <Link href="/business/profile" className="inline-block mt-3 text-sm font-medium text-yellow-800 hover:text-yellow-900">
-                                        지금 인증하기 →
+                                        今すぐ認証する →
                                     </Link>
                                 </div>
                             </div>
@@ -148,7 +148,7 @@ export default async function BusinessDashboardPage() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600">제출한 제안</p>
+                                    <p className="text-sm text-gray-600">提出した提案</p>
                                     <p className="text-3xl font-bold text-gray-900 mt-1">{proposalCount}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -162,7 +162,7 @@ export default async function BusinessDashboardPage() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600">진행 중인 계약</p>
+                                    <p className="text-sm text-gray-600">進行中の契約</p>
                                     <p className="text-3xl font-bold text-gray-900 mt-1">{activeContracts}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -176,7 +176,7 @@ export default async function BusinessDashboardPage() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600">완료된 계약</p>
+                                    <p className="text-sm text-gray-600">完了した契約</p>
                                     <p className="text-3xl font-bold text-gray-900 mt-1">{completedContracts}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -190,10 +190,10 @@ export default async function BusinessDashboardPage() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600">이번 달 수익</p>
+                                    <p className="text-sm text-gray-600">今月の収益</p>
                                     <p className="text-3xl font-bold text-gray-900 mt-1">
                                         {(monthlyEarnings._sum.amount || 0).toLocaleString()}
-                                        <span className="text-lg">원</span>
+                                        <span className="text-lg">円</span>
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
@@ -208,15 +208,15 @@ export default async function BusinessDashboardPage() {
                     {/* Quick Stats */}
                     <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900">이용 가능한 프로젝트</h2>
+                            <h2 className="text-lg font-semibold text-gray-900">募集中の案件</h2>
                             <span className="text-3xl font-bold text-primary-600">{availableProjects}</span>
                         </div>
-                        <p className="text-gray-600 mb-4">현재 모집 중인 프로젝트가 {availableProjects}개 있습니다.</p>
+                        <p className="text-gray-600 mb-4">現在募集中の案件が{availableProjects}件ございます。</p>
                         <Link
                             href="/business/projects"
                             className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
                         >
-                            프로젝트 둘러보기
+                            案件を見る
                             <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
@@ -227,9 +227,9 @@ export default async function BusinessDashboardPage() {
                     <div className="bg-white rounded-xl shadow-sm">
                         <div className="p-6 border-b">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900">최근 제안</h2>
+                                <h2 className="text-lg font-semibold text-gray-900">最近の提案</h2>
                                 <Link href="/business/proposals" className="text-sm text-primary-600 hover:text-primary-700">
-                                    전체 보기 →
+                                    すべて見る →
                                 </Link>
                             </div>
                         </div>
@@ -239,12 +239,12 @@ export default async function BusinessDashboardPage() {
                                     <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <p className="text-gray-500">제출한 제안이 없습니다.</p>
+                                    <p className="text-gray-500">提出した提案がございません。</p>
                                     <Link
                                         href="/business/projects"
                                         className="inline-block mt-4 text-primary-600 hover:text-primary-700"
                                     >
-                                        프로젝트에 제안하기
+                                        案件に提案する
                                     </Link>
                                 </div>
                             ) : (
@@ -257,9 +257,9 @@ export default async function BusinessDashboardPage() {
                                         <div className="flex-1">
                                             <h3 className="font-medium text-gray-900">{proposal.project.title}</h3>
                                             <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                                                <span>{proposal.amount.toLocaleString()}원</span>
+                                                <span>{proposal.amount.toLocaleString()}円</span>
                                                 <span>•</span>
-                                                <span>{new Date(proposal.createdAt).toLocaleDateString('ko-KR')}</span>
+                                                <span>{new Date(proposal.createdAt).toLocaleDateString('ja-JP')}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ export default async function BusinessDashboardPage() {
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-red-100 text-red-800'
                                             }`}>
-                                                {proposal.status === 'PENDING' ? '검토중' : proposal.status === 'ACCEPTED' ? '수락됨' : '거절됨'}
+                                                {proposal.status === 'PENDING' ? '審査中' : proposal.status === 'ACCEPTED' ? '承認済み' : 'お見送り'}
                                             </span>
                                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -285,38 +285,38 @@ export default async function BusinessDashboardPage() {
                     {/* Profile Completion */}
                     {businessProfile && (
                         <div className="bg-white rounded-xl shadow-sm p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">프로필 완성도</h2>
+                            <h2 className="text-lg font-semibold text-gray-900 mb-4">プロフィール完成度</h2>
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">기본 정보</span>
+                                    <span className="text-sm text-gray-600">基本情報</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                         businessProfile.companyName ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.companyName ? '완료' : '미완료'}
+                                        {businessProfile.companyName ? '完了' : '未完了'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">사업자 인증</span>
+                                    <span className="text-sm text-gray-600">事業者認証</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                         businessProfile.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.verified ? '완료' : '미완료'}
+                                        {businessProfile.verified ? '完了' : '未完了'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">포트폴리오</span>
+                                    <span className="text-sm text-gray-600">ポートフォリオ</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                         businessProfile.portfolioImages.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.portfolioImages.length > 0 ? `${businessProfile.portfolioImages.length}개 등록` : '미등록'}
+                                        {businessProfile.portfolioImages.length > 0 ? `${businessProfile.portfolioImages.length}件登録` : '未登録'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">서비스 지역</span>
+                                    <span className="text-sm text-gray-600">対応エリア</span>
                                     <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                         businessProfile.serviceAreas.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                     }`}>
-                                        {businessProfile.serviceAreas.length > 0 ? `${businessProfile.serviceAreas.length}개 지역` : '미설정'}
+                                        {businessProfile.serviceAreas.length > 0 ? `${businessProfile.serviceAreas.length}エリア` : '未設定'}
                                     </span>
                                 </div>
                             </div>
@@ -324,7 +324,7 @@ export default async function BusinessDashboardPage() {
                                 href="/business/profile"
                                 className="mt-4 inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
                             >
-                                프로필 관리하기
+                                プロフィールを管理する
                                 <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>

@@ -110,15 +110,15 @@ export function FileUpload({
                 </svg>
                 <p className="mt-2 text-sm text-gray-600">
                     {isDragActive ? (
-                        '파일을 놓으세요'
+                        'ファイルをドロップしてください'
                     ) : (
                         <>
-                            <span className="font-medium text-primary-600">클릭하여 업로드</span> 또는 드래그 앤 드롭
+                            <span className="font-medium text-primary-600">クリックしてアップロード</span>またはドラッグ＆ドロップ
                         </>
                     )}
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
-                    최대 {maxFiles}개, {formatFileSize(maxSize)} 이하
+                    最大{maxFiles}件、{formatFileSize(maxSize)}以下
                 </p>
             </div>
 
@@ -126,7 +126,7 @@ export function FileUpload({
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
             {fileRejections.length > 0 && (
                 <p className="mt-1 text-sm text-red-600">
-                    일부 파일이 거부되었습니다. 파일 형식과 크기를 확인하세요.
+                    一部のファイルが拒否されました。ファイル形式とサイズをご確認ください。
                 </p>
             )}
             {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}

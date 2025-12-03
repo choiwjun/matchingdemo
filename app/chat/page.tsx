@@ -239,7 +239,7 @@ function ChatContent() {
 
     const getParticipantName = (room: ChatRoom) => {
         const other = room.participants?.find((p) => p.id !== session?.user?.id);
-        if (!other) return '알 수 없음';
+        if (!other) return '不明';
         if (other.businessProfile?.companyName) return other.businessProfile.companyName;
         if (other.profile) return `${other.profile.lastName}${other.profile.firstName}`;
         return other.email;
@@ -257,13 +257,13 @@ function ChatContent() {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
         if (days === 0) {
-            return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
         } else if (days === 1) {
-            return '어제';
+            return '昨日';
         } else if (days < 7) {
-            return `${days}일 전`;
+            return `${days}日前`;
         } else {
-            return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
         }
     };
 
@@ -280,7 +280,7 @@ function ChatContent() {
             {/* Room List */}
             <div className={`w-full md:w-80 border-r flex flex-col ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-900">채팅</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">チャット</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {rooms.length === 0 ? (
@@ -288,7 +288,7 @@ function ChatContent() {
                             <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <p className="text-gray-500">채팅방이 없습니다.</p>
+                            <p className="text-gray-500">チャットルームがありません。</p>
                         </div>
                     ) : (
                         rooms.map((room) => (
@@ -314,7 +314,7 @@ function ChatContent() {
                                         </span>
                                     </div>
                                     <p className="text-sm text-gray-500 truncate">
-                                        {room.lastMessage?.content || '새 대화를 시작하세요'}
+                                        {room.lastMessage?.content || '新しい会話を始めましょう'}
                                     </p>
                                 </div>
                                 {room.unreadCount > 0 && (
@@ -426,7 +426,7 @@ function ChatContent() {
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                    placeholder="메시지를 입력하세요..."
+                                    placeholder="メッセージを入力してください..."
                                     className="flex-1"
                                 />
                                 <Button onClick={sendMessage} isLoading={isSending}>
@@ -443,7 +443,7 @@ function ChatContent() {
                             <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <p className="text-gray-500">채팅방을 선택하세요</p>
+                            <p className="text-gray-500">チャットルームを選択してください</p>
                         </div>
                     </div>
                 )}

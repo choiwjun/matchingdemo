@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
         if (existingUser) {
             return NextResponse.json(
-                { error: '이미 등록된 이메일입니다.' },
+                { error: 'このメールアドレスは既に登録されております。' },
                 { status: 400 }
             );
         }
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error('Registration error:', error);
         return NextResponse.json(
-            { error: '회원가입 처리 중 오류가 발생했습니다.' },
+            { error: '会員登録処理中にエラーが発生いたしました。' },
             { status: 500 }
         );
     }

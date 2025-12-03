@@ -70,12 +70,12 @@ export default function NewProjectPage() {
 
             if (!response.ok) {
                 const result = await response.json();
-                throw new Error(result.error || '프로젝트 등록에 실패했습니다.');
+                throw new Error(result.error || '案件の登録に失敗いたしました。');
             }
 
             router.push('/dashboard/projects?created=true');
         } catch (err) {
-            setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
+            setError(err instanceof Error ? err.message : 'エラーが発生いたしました。');
         } finally {
             setIsLoading(false);
         }
@@ -96,7 +96,7 @@ export default function NewProjectPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-xl font-bold text-gray-900">새 프로젝트 등록</h1>
+                            <h1 className="text-xl font-bold text-gray-900">新規案件の登録</h1>
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@ export default function NewProjectPage() {
             <main className="container mx-auto px-4 py-8 max-w-3xl">
                 {/* Progress Steps */}
                 <div className="flex items-center justify-center mb-8">
-                    {['기본 정보', '상세 내용', '파일 업로드'].map((label, index) => (
+                    {['基本情報', '詳細内容', 'ファイル添付'].map((label, index) => (
                         <React.Fragment key={index}>
                             <div className="flex flex-col items-center">
                                 <div
@@ -149,57 +149,57 @@ export default function NewProjectPage() {
                         {/* Step 1: Basic Info */}
                         {step === 1 && (
                             <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">基本情報</h2>
 
                                 <Input
-                                    label="프로젝트 제목"
-                                    placeholder="예: 아파트 인테리어 리모델링"
+                                    label="案件タイトル"
+                                    placeholder="例：マンションのインテリアリフォーム"
                                     {...register('title', {
-                                        required: '제목을 입력해주세요.',
+                                        required: 'タイトルを入力してください。',
                                         maxLength: {
                                             value: 100,
-                                            message: '제목은 100자 이내로 입력해주세요.',
+                                            message: 'タイトルは100文字以内で入力してください。',
                                         },
                                     })}
                                     error={errors.title?.message}
                                 />
 
                                 <Select
-                                    label="카테고리"
+                                    label="カテゴリ"
                                     options={CATEGORIES.map((c) => ({
                                         value: c.id,
                                         label: `${c.icon} ${c.nameKo}`,
                                     }))}
-                                    placeholder="카테고리를 선택하세요"
+                                    placeholder="カテゴリを選択してください"
                                     {...register('category', {
-                                        required: '카테고리를 선택해주세요.',
+                                        required: 'カテゴリを選択してください。',
                                     })}
                                     error={errors.category?.message}
                                 />
 
                                 <Select
-                                    label="지역"
+                                    label="地域"
                                     options={REGIONS.map((r) => ({
                                         value: r.id,
                                         label: r.name,
                                     }))}
-                                    placeholder="지역을 선택하세요"
+                                    placeholder="地域を選択してください"
                                     {...register('location', {
-                                        required: '지역을 선택해주세요.',
+                                        required: '地域を選択してください。',
                                     })}
                                     error={errors.location?.message}
                                 />
 
                                 <Input
-                                    label="상세 주소"
-                                    placeholder="정확한 주소를 입력하세요 (선택)"
+                                    label="詳細住所"
+                                    placeholder="正確な住所を入力してください（任意）"
                                     {...register('address')}
-                                    helperText="상세 주소는 매칭 후 공개됩니다."
+                                    helperText="詳細住所はマッチング後に公開されます。"
                                 />
 
                                 <div className="flex justify-end">
                                     <Button type="button" onClick={() => setStep(2)}>
-                                        다음
+                                        次へ
                                     </Button>
                                 </div>
                             </div>
@@ -208,17 +208,17 @@ export default function NewProjectPage() {
                         {/* Step 2: Details */}
                         {step === 2 && (
                             <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4">상세 내용</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">詳細内容</h2>
 
                                 <Textarea
-                                    label="프로젝트 설명"
-                                    placeholder="작업 내용을 자세히 설명해주세요. 더 정확한 견적을 받을 수 있습니다."
+                                    label="案件の説明"
+                                    placeholder="作業内容を詳しくご説明ください。より正確なお見積もりを受け取ることができます。"
                                     rows={5}
                                     {...register('description', {
-                                        required: '설명을 입력해주세요.',
+                                        required: '説明を入力してください。',
                                         minLength: {
                                             value: 20,
-                                            message: '20자 이상 입력해주세요.',
+                                            message: '20文字以上で入力してください。',
                                         },
                                     })}
                                     error={errors.description?.message}
@@ -228,7 +228,7 @@ export default function NewProjectPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-3">
-                                        예산 범위
+                                        予算範囲
                                     </label>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {BUDGET_RANGES.map((range) => (
@@ -244,7 +244,7 @@ export default function NewProjectPage() {
                                                     type="radio"
                                                     value={range.id}
                                                     {...register('budgetRange', {
-                                                        required: '예산 범위를 선택해주세요.',
+                                                        required: '予算範囲を選択してください。',
                                                     })}
                                                     className="sr-only"
                                                 />
@@ -258,25 +258,25 @@ export default function NewProjectPage() {
                                 </div>
 
                                 <Input
-                                    label="마감일"
+                                    label="締切日"
                                     type="date"
                                     {...register('deadline')}
-                                    helperText="제안을 받고 싶은 마감일을 설정하세요. (선택)"
+                                    helperText="提案を受け取りたい締切日を設定してください。（任意）"
                                 />
 
                                 <Textarea
-                                    label="추가 요구사항"
-                                    placeholder="특별히 원하시는 조건이나 요구사항을 입력하세요. (선택)"
+                                    label="追加のご要望"
+                                    placeholder="特にご希望の条件やご要望がございましたら入力してください。（任意）"
                                     rows={3}
                                     {...register('requirements')}
                                 />
 
                                 <div className="flex gap-3 justify-between">
                                     <Button type="button" variant="outline" onClick={() => setStep(1)}>
-                                        이전
+                                        戻る
                                     </Button>
                                     <Button type="button" onClick={() => setStep(3)}>
-                                        다음
+                                        次へ
                                     </Button>
                                 </div>
                             </div>
@@ -285,45 +285,45 @@ export default function NewProjectPage() {
                         {/* Step 3: File Upload */}
                         {step === 3 && (
                             <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4">파일 업로드</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">ファイル添付</h2>
 
                                 <FileUpload
-                                    label="사진 업로드"
+                                    label="写真をアップロード"
                                     accept={['image/jpeg', 'image/png', 'image/gif', 'image/webp']}
                                     maxFiles={10}
                                     maxSize={5 * 1024 * 1024}
                                     value={images}
                                     onChange={setImages}
-                                    helperText="작업 현장이나 관련 사진을 업로드하세요. (최대 10장)"
+                                    helperText="作業現場や関連写真をアップロードしてください。（最大10枚）"
                                     previewType="image"
                                 />
 
                                 <FileUpload
-                                    label="첨부파일"
+                                    label="添付ファイル"
                                     accept={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                                     maxFiles={5}
                                     maxSize={10 * 1024 * 1024}
                                     value={attachments}
                                     onChange={setAttachments}
-                                    helperText="도면, 견적서 등 관련 문서를 업로드하세요. (최대 5개)"
+                                    helperText="図面、見積書などの関連資料をアップロードしてください。（最大5件）"
                                     previewType="file"
                                 />
 
                                 <div className="bg-blue-50 rounded-lg p-4">
-                                    <h3 className="font-medium text-blue-900 mb-2">등록 안내</h3>
+                                    <h3 className="font-medium text-blue-900 mb-2">登録についてのご案内</h3>
                                     <ul className="text-sm text-blue-800 space-y-1">
-                                        <li>• 프로젝트가 등록되면 관련 사업자들에게 알림이 발송됩니다.</li>
-                                        <li>• 사업자들의 제안을 검토하고 원하는 사업자를 선택할 수 있습니다.</li>
-                                        <li>• 개인정보는 매칭 후 상대방에게만 공개됩니다.</li>
+                                        <li>・案件が登録されると、関連する事業者に通知が送信されます。</li>
+                                        <li>・事業者からの提案を確認し、ご希望の事業者をお選びいただけます。</li>
+                                        <li>・個人情報はマッチング後に相手方にのみ公開されます。</li>
                                     </ul>
                                 </div>
 
                                 <div className="flex gap-3 justify-between">
                                     <Button type="button" variant="outline" onClick={() => setStep(2)}>
-                                        이전
+                                        戻る
                                     </Button>
                                     <Button type="submit" isLoading={isLoading}>
-                                        프로젝트 등록
+                                        案件を登録する
                                     </Button>
                                 </div>
                             </div>

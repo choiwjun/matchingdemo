@@ -46,10 +46,10 @@ export default async function DashboardPage() {
             {/* Welcome Section */}
             <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-8 text-white">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    안녕하세요! 👋
+                    ようこそ！ 👋
                 </h1>
                 <p className="text-primary-100 mb-6">
-                    원하는 서비스를 등록하고 전문가의 제안을 받아보세요.
+                    ご希望のサービスを登録して、専門家からのご提案をお待ちください。
                 </p>
                 <Link
                     href="/dashboard/projects/new"
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    새 프로젝트 등록
+                    新規案件を登録
                 </Link>
             </div>
 
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">등록한 프로젝트</p>
+                            <p className="text-sm text-gray-600">登録した案件</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{projectCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">대기 중인 제안</p>
+                            <p className="text-sm text-gray-600">審査中の提案</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{pendingProposalCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">진행 중인 계약</p>
+                            <p className="text-sm text-gray-600">進行中の契約</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{activeContractCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">완료된 계약</p>
+                            <p className="text-sm text-gray-600">完了した契約</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">0</p>
                         </div>
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -125,9 +125,9 @@ export default async function DashboardPage() {
             <div className="bg-white rounded-xl shadow-sm">
                 <div className="p-6 border-b">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-gray-900">최근 프로젝트</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">最近の案件</h2>
                         <Link href="/dashboard/projects" className="text-sm text-primary-600 hover:text-primary-700">
-                            전체 보기 →
+                            すべて見る →
                         </Link>
                     </div>
                 </div>
@@ -137,12 +137,12 @@ export default async function DashboardPage() {
                             <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <p className="text-gray-500">등록된 프로젝트가 없습니다.</p>
+                            <p className="text-gray-500">登録された案件がありません。</p>
                             <Link
                                 href="/dashboard/projects/new"
                                 className="inline-block mt-4 text-primary-600 hover:text-primary-700"
                             >
-                                첫 프로젝트 등록하기
+                                最初の案件を登録する
                             </Link>
                         </div>
                     ) : (
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
                                         <span>•</span>
                                         <span>{project.location}</span>
                                         <span>•</span>
-                                        <span>{new Date(project.createdAt).toLocaleDateString('ko-KR')}</span>
+                                        <span>{new Date(project.createdAt).toLocaleDateString('ja-JP')}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                                         <div className="text-lg font-semibold text-primary-600">
                                             {project._count.proposals}
                                         </div>
-                                        <div className="text-xs text-gray-500">개 제안</div>
+                                        <div className="text-xs text-gray-500">件の提案</div>
                                     </div>
                                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -190,8 +190,8 @@ export default async function DashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">새 프로젝트</h3>
-                    <p className="text-sm text-gray-500 mt-1">서비스 의뢰를 등록하세요</p>
+                    <h3 className="font-semibold text-gray-900">新規案件</h3>
+                    <p className="text-sm text-gray-500 mt-1">サービス依頼を登録してください</p>
                 </Link>
 
                 <Link
@@ -203,8 +203,8 @@ export default async function DashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">채팅</h3>
-                    <p className="text-sm text-gray-500 mt-1">사업자와 대화하세요</p>
+                    <h3 className="font-semibold text-gray-900">チャット</h3>
+                    <p className="text-sm text-gray-500 mt-1">事業者とご相談ください</p>
                 </Link>
 
                 <Link
@@ -216,8 +216,8 @@ export default async function DashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">프로필 관리</h3>
-                    <p className="text-sm text-gray-500 mt-1">계정 정보를 수정하세요</p>
+                    <h3 className="font-semibold text-gray-900">プロフィール管理</h3>
+                    <p className="text-sm text-gray-500 mt-1">アカウント情報を編集してください</p>
                 </Link>
             </div>
         </div>

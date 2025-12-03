@@ -70,8 +70,8 @@ export default async function AdminDashboardPage() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">관리자 대시보드</h1>
-                <p className="text-gray-600 mt-1">플랫폼 현황을 한눈에 확인하세요.</p>
+                <h1 className="text-2xl font-bold text-gray-900">管理者ダッシュボード</h1>
+                <p className="text-gray-600 mt-1">プラットフォームの現況を一目でご確認いただけます。</p>
             </div>
 
             {/* Alert Cards */}
@@ -89,8 +89,8 @@ export default async function AdminDashboardPage() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="font-medium text-yellow-900">인증 대기</h3>
-                                    <p className="text-sm text-yellow-700">{pendingVerifications}건의 사업자 인증 요청</p>
+                                    <h3 className="font-medium text-yellow-900">認証待ち</h3>
+                                    <p className="text-sm text-yellow-700">{pendingVerifications}件の事業者認証リクエスト</p>
                                 </div>
                             </div>
                         </Link>
@@ -107,8 +107,8 @@ export default async function AdminDashboardPage() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="font-medium text-red-900">신고 접수</h3>
-                                    <p className="text-sm text-red-700">{pendingReports}건의 미처리 신고</p>
+                                    <h3 className="font-medium text-red-900">通報受付</h3>
+                                    <p className="text-sm text-red-700">{pendingReports}件の未処理通報</p>
                                 </div>
                             </div>
                         </Link>
@@ -121,7 +121,7 @@ export default async function AdminDashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">총 사용자</p>
+                            <p className="text-sm text-gray-600">総ユーザー数</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{totalUsers}</p>
                         </div>
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -130,13 +130,13 @@ export default async function AdminDashboardPage() {
                             </svg>
                         </div>
                     </div>
-                    <div className="mt-2 text-sm text-green-600">+{monthlyNewUsers} 이번 달</div>
+                    <div className="mt-2 text-sm text-green-600">+{monthlyNewUsers} 今月</div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">총 사업자</p>
+                            <p className="text-sm text-gray-600">総事業者数</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{totalBusinesses}</p>
                         </div>
                         <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
@@ -150,7 +150,7 @@ export default async function AdminDashboardPage() {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">총 프로젝트</p>
+                            <p className="text-sm text-gray-600">総案件数</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{totalProjects}</p>
                         </div>
                         <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -159,13 +159,13 @@ export default async function AdminDashboardPage() {
                             </svg>
                         </div>
                     </div>
-                    <div className="mt-2 text-sm text-blue-600">{activeProjects} 모집중</div>
+                    <div className="mt-2 text-sm text-blue-600">{activeProjects} 募集中</div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-600">총 계약</p>
+                            <p className="text-sm text-gray-600">総契約数</p>
                             <p className="text-3xl font-bold text-gray-900 mt-1">{totalContracts}</p>
                         </div>
                         <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -174,43 +174,43 @@ export default async function AdminDashboardPage() {
                             </svg>
                         </div>
                     </div>
-                    <div className="mt-2 text-sm text-green-600">+{monthlyContracts} 이번 달</div>
+                    <div className="mt-2 text-sm text-green-600">+{monthlyContracts} 今月</div>
                 </div>
             </div>
 
             {/* Revenue Stats */}
             <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl p-6 text-white">
-                    <h3 className="text-lg font-semibold mb-4">이번 달 수익</h3>
+                    <h3 className="text-lg font-semibold mb-4">今月の収益</h3>
                     <div className="space-y-4">
                         <div>
-                            <p className="text-primary-100 text-sm">총 거래액</p>
-                            <p className="text-3xl font-bold">{(monthlyRevenue._sum.amount || 0).toLocaleString()}원</p>
+                            <p className="text-primary-100 text-sm">総取引額</p>
+                            <p className="text-3xl font-bold">{(monthlyRevenue._sum.amount || 0).toLocaleString()}円</p>
                         </div>
                         <div>
-                            <p className="text-primary-100 text-sm">플랫폼 수수료 (10%)</p>
-                            <p className="text-2xl font-bold">{platformFee.toLocaleString()}원</p>
+                            <p className="text-primary-100 text-sm">プラットフォーム手数料（10%）</p>
+                            <p className="text-2xl font-bold">{platformFee.toLocaleString()}円</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">이번 달 현황</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">今月の状況</h3>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-gray-600">신규 가입자</span>
-                            <span className="font-semibold text-gray-900">{monthlyNewUsers}명</span>
+                            <span className="text-gray-600">新規登録者</span>
+                            <span className="font-semibold text-gray-900">{monthlyNewUsers}名</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-gray-600">등록 프로젝트</span>
-                            <span className="font-semibold text-gray-900">{monthlyProjects}건</span>
+                            <span className="text-gray-600">登録案件</span>
+                            <span className="font-semibold text-gray-900">{monthlyProjects}件</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-gray-600">체결 계약</span>
-                            <span className="font-semibold text-gray-900">{monthlyContracts}건</span>
+                            <span className="text-gray-600">成立契約</span>
+                            <span className="font-semibold text-gray-900">{monthlyContracts}件</span>
                         </div>
                         <div className="flex items-center justify-between">
-                            <span className="text-gray-600">매칭률</span>
+                            <span className="text-gray-600">マッチング率</span>
                             <span className="font-semibold text-gray-900">
                                 {monthlyProjects > 0 ? ((monthlyContracts / monthlyProjects) * 100).toFixed(1) : 0}%
                             </span>
@@ -224,9 +224,9 @@ export default async function AdminDashboardPage() {
                 {/* Recent Users */}
                 <div className="bg-white rounded-xl shadow-sm">
                     <div className="p-4 border-b flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">최근 가입자</h3>
+                        <h3 className="font-semibold text-gray-900">最近の登録者</h3>
                         <Link href="/admin/users" className="text-sm text-primary-600 hover:text-primary-700">
-                            전체 보기 →
+                            すべて見る →
                         </Link>
                     </div>
                     <div className="divide-y">
@@ -241,12 +241,12 @@ export default async function AdminDashboardPage() {
                                     <div>
                                         <p className="font-medium text-gray-900">{user.email}</p>
                                         <p className="text-sm text-gray-500">
-                                            {user.role === 'BUSINESS' ? '사업자' : '일반 사용자'}
+                                            {user.role === 'BUSINESS' ? '事業者' : '一般ユーザー'}
                                         </p>
                                     </div>
                                 </div>
                                 <span className="text-xs text-gray-500">
-                                    {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                                    {new Date(user.createdAt).toLocaleDateString('ja-JP')}
                                 </span>
                             </div>
                         ))}
@@ -256,9 +256,9 @@ export default async function AdminDashboardPage() {
                 {/* Recent Projects */}
                 <div className="bg-white rounded-xl shadow-sm">
                     <div className="p-4 border-b flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900">최근 프로젝트</h3>
+                        <h3 className="font-semibold text-gray-900">最近の案件</h3>
                         <Link href="/admin/projects" className="text-sm text-primary-600 hover:text-primary-700">
-                            전체 보기 →
+                            すべて見る →
                         </Link>
                     </div>
                     <div className="divide-y">
@@ -278,7 +278,7 @@ export default async function AdminDashboardPage() {
                                             ? 'bg-blue-100 text-blue-800'
                                             : 'bg-gray-100 text-gray-800'
                                     }`}>
-                                        {project.status === 'OPEN' ? '모집중' : project.status === 'IN_PROGRESS' ? '진행중' : '완료'}
+                                        {project.status === 'OPEN' ? '募集中' : project.status === 'IN_PROGRESS' ? '進行中' : '完了'}
                                     </span>
                                 </div>
                             </div>
@@ -298,7 +298,7 @@ export default async function AdminDashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">회원 관리</h3>
+                    <h3 className="font-semibold text-gray-900">会員管理</h3>
                 </Link>
 
                 <Link
@@ -310,7 +310,7 @@ export default async function AdminDashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">프로젝트 관리</h3>
+                    <h3 className="font-semibold text-gray-900">案件管理</h3>
                 </Link>
 
                 <Link
@@ -322,7 +322,7 @@ export default async function AdminDashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">정산 관리</h3>
+                    <h3 className="font-semibold text-gray-900">精算管理</h3>
                 </Link>
 
                 <Link
@@ -334,7 +334,7 @@ export default async function AdminDashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">콘텐츠 관리</h3>
+                    <h3 className="font-semibold text-gray-900">コンテンツ管理</h3>
                 </Link>
             </div>
         </div>
