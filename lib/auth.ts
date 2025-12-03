@@ -4,6 +4,11 @@ import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
+// NEXTAUTH_SECRET이 없으면 경고 (프로덕션에서는 필수)
+if (!process.env.NEXTAUTH_SECRET) {
+    console.warn('⚠️ NEXTAUTH_SECRET is not set. Please set it in environment variables.');
+}
+
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -14,7 +19,7 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error('メールアドレスとパスワードを入力してください。');
+                    return null;
                 }
 
                 try {
@@ -56,7 +61,7 @@ export const authOptions: NextAuthOptions = {
                     });
 
                     if (!user || !user.password) {
-                        throw new Error('メールアドレスまたはパスワードが正しくありません。');
+                        return null;
                     }
 
                     const isPasswordValid = await bcrypt.compare(
@@ -65,7 +70,7 @@ export const authOptions: NextAuthOptions = {
                     );
 
                     if (!isPasswordValid) {
-                        throw new Error('メールアドレスまたはパスワードが正しくありません。');
+                        return null;
                     }
 
                     return {
@@ -75,10 +80,7 @@ export const authOptions: NextAuthOptions = {
                     };
                 } catch (error) {
                     console.error('Auth error:', error);
-                    if (error instanceof Error && error.message.includes('メール')) {
-                        throw error;
-                    }
-                    throw new Error('ログイン処理中にエラーが発生しました。データベース接続を確認してください。');
+                    return null;
                 }
             },
         }),
@@ -125,6 +127,7 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    // secret이 없으면 기본값 사용 (개발용, 프로덕션에서는 반드시 설정 필요)
+    secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only',
     debug: process.env.NODE_ENV === 'development',
 };
