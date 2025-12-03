@@ -1,27 +1,37 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function BusinessLayout({
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+export default function BusinessLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    let session;
-    
-    try {
-        session = await getServerSession(authOptions);
-    } catch (error) {
-        console.error('Session error in business layout:', error);
-        redirect('/auth/login?error=session');
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/auth/login');
+        } else if (status === 'authenticated') {
+            if (session?.user?.role !== 'BUSINESS' && session?.user?.role !== 'ADMIN') {
+                router.push('/dashboard');
+            }
+        }
+    }, [status, session, router]);
+
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+            </div>
+        );
     }
 
-    if (!session) {
-        redirect('/auth/login');
-    }
-
-    if (session.user.role !== 'BUSINESS' && session.user.role !== 'ADMIN') {
-        redirect('/dashboard');
+    if (!session || (session.user?.role !== 'BUSINESS' && session.user?.role !== 'ADMIN')) {
+        return null;
     }
 
     return <>{children}</>;

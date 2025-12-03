@@ -1,28 +1,38 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function AdminLayout({
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useEffect } from 'react';
+
+export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    let session;
-    
-    try {
-        session = await getServerSession(authOptions);
-    } catch (error) {
-        console.error('Session error in admin layout:', error);
-        redirect('/auth/login?error=session');
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/auth/login');
+        } else if (status === 'authenticated') {
+            if (session?.user?.role !== 'ADMIN') {
+                router.push('/dashboard');
+            }
+        }
+    }, [status, session, router]);
+
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+            </div>
+        );
     }
 
-    if (!session) {
-        redirect('/auth/login');
-    }
-
-    if (session.user.role !== 'ADMIN') {
-        redirect('/dashboard');
+    if (!session || session.user?.role !== 'ADMIN') {
+        return null;
     }
 
     const navigation = [
@@ -56,7 +66,7 @@ export default async function AdminLayout({
                                 <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-medium">
                                     A
                                 </div>
-                                <span className="text-sm">{session.user.email}</span>
+                                <span className="text-sm">{session.user?.email}</span>
                             </div>
                         </div>
                     </div>

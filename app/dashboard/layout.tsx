@@ -1,34 +1,43 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function DashboardLayout({
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useEffect } from 'react';
+
+export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    let session;
-    
-    try {
-        session = await getServerSession(authOptions);
-    } catch (error) {
-        console.error('Session error in dashboard layout:', error);
-        redirect('/auth/login?error=session');
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.push('/auth/login');
+        } else if (status === 'authenticated') {
+            // Redirect business users to business dashboard
+            if (session?.user?.role === 'BUSINESS') {
+                router.push('/business');
+            }
+            // Redirect admin users to admin dashboard
+            if (session?.user?.role === 'ADMIN') {
+                router.push('/admin');
+            }
+        }
+    }, [status, session, router]);
+
+    if (status === 'loading') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+            </div>
+        );
     }
 
     if (!session) {
-        redirect('/auth/login');
-    }
-
-    // Redirect business users to business dashboard
-    if (session.user.role === 'BUSINESS') {
-        redirect('/business');
-    }
-
-    // Redirect admin users to admin dashboard
-    if (session.user.role === 'ADMIN') {
-        redirect('/admin');
+        return null;
     }
 
     const navigation = [
@@ -81,10 +90,10 @@ export default async function DashboardLayout({
                             <div className="flex items-center gap-3">
                                 <Link href="/dashboard/profile" className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg transition-colors">
                                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium">
-                                        {session.user.email?.[0]?.toUpperCase() || 'U'}
+                                        {session.user?.email?.[0]?.toUpperCase() || 'U'}
                                     </div>
                                     <span className="hidden md:block text-sm text-gray-700">
-                                        {session.user.email}
+                                        {session.user?.email}
                                     </span>
                                 </Link>
                             </div>

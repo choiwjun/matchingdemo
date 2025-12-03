@@ -1,52 +1,69 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+'use client';
+
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export const dynamic = 'force-dynamic';
+interface DashboardStats {
+    projectCount: number;
+    activeContractCount: number;
+    pendingProposalCount: number;
+}
 
-export default async function DashboardPage() {
-    const session = await getServerSession(authOptions);
+export default function DashboardPage() {
+    const { data: session, status } = useSession();
+    const [stats, setStats] = useState<DashboardStats>({
+        projectCount: 0,
+        activeContractCount: 0,
+        pendingProposalCount: 0,
+    });
+    const [loading, setLoading] = useState(true);
 
-    if (!session) return null;
+    useEffect(() => {
+        // 데모용 - 실제로는 API에서 가져옴
+        const fetchStats = async () => {
+            try {
+                // TODO: API 연동 시 실제 데이터 fetch
+                // const res = await fetch('/api/dashboard/stats');
+                // const data = await res.json();
+                // setStats(data);
+                
+                // 현재는 데모 데이터
+                setStats({
+                    projectCount: 0,
+                    activeContractCount: 0,
+                    pendingProposalCount: 0,
+                });
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // Fetch user stats
-    const [projectCount, activeContractCount, pendingProposalCount, recentProjects] = await Promise.all([
-        prisma.project.count({
-            where: { userId: session.user.id },
-        }),
-        prisma.contract.count({
-            where: {
-                userId: session.user.id,
-                status: 'ACTIVE',
-            },
-        }),
-        prisma.proposal.count({
-            where: {
-                project: {
-                    userId: session.user.id,
-                },
-                status: 'PENDING',
-            },
-        }),
-        prisma.project.findMany({
-            where: { userId: session.user.id },
-            include: {
-                _count: {
-                    select: { proposals: true },
-                },
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-        }),
-    ]);
+        if (session) {
+            fetchStats();
+        }
+    }, [session]);
+
+    if (status === 'loading' || loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+            </div>
+        );
+    }
+
+    if (!session) {
+        return null;
+    }
 
     return (
         <div className="space-y-8">
             {/* Welcome Section */}
             <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-8 text-white">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    ようこそ！ 👋
+                    ようこそ、{session.user?.email?.split('@')[0]}さん！ 👋
                 </h1>
                 <p className="text-primary-100 mb-6">
                     ご希望のサービスを登録して、専門家からのご提案をお待ちください。
@@ -68,7 +85,7 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600">登録した案件</p>
-                            <p className="text-3xl font-bold text-gray-900 mt-1">{projectCount}</p>
+                            <p className="text-3xl font-bold text-gray-900 mt-1">{stats.projectCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +99,7 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600">審査中の提案</p>
-                            <p className="text-3xl font-bold text-gray-900 mt-1">{pendingProposalCount}</p>
+                            <p className="text-3xl font-bold text-gray-900 mt-1">{stats.pendingProposalCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +113,7 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600">進行中の契約</p>
-                            <p className="text-3xl font-bold text-gray-900 mt-1">{activeContractCount}</p>
+                            <p className="text-3xl font-bold text-gray-900 mt-1">{stats.activeContractCount}</p>
                         </div>
                         <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +138,7 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* Recent Projects */}
+            {/* Recent Projects - Empty State */}
             <div className="bg-white rounded-xl shadow-sm">
                 <div className="p-6 border-b">
                     <div className="flex items-center justify-between">
@@ -131,51 +148,17 @@ export default async function DashboardPage() {
                         </Link>
                     </div>
                 </div>
-                <div className="divide-y">
-                    {recentProjects.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p className="text-gray-500">登録された案件がありません。</p>
-                            <Link
-                                href="/dashboard/projects/new"
-                                className="inline-block mt-4 text-primary-600 hover:text-primary-700"
-                            >
-                                最初の案件を登録する
-                            </Link>
-                        </div>
-                    ) : (
-                        recentProjects.map((project) => (
-                            <Link
-                                key={project.id}
-                                href={`/dashboard/projects/${project.id}`}
-                                className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                            >
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900">{project.title}</h3>
-                                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                                        <span>{project.category}</span>
-                                        <span>•</span>
-                                        <span>{project.location}</span>
-                                        <span>•</span>
-                                        <span>{new Date(project.createdAt).toLocaleDateString('ja-JP')}</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <div className="text-lg font-semibold text-primary-600">
-                                            {project._count.proposals}
-                                        </div>
-                                        <div className="text-xs text-gray-500">件の提案</div>
-                                    </div>
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </div>
-                            </Link>
-                        ))
-                    )}
+                <div className="p-8 text-center">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-gray-500">登録された案件がありません。</p>
+                    <Link
+                        href="/dashboard/projects/new"
+                        className="inline-block mt-4 text-primary-600 hover:text-primary-700"
+                    >
+                        最初の案件を登録する
+                    </Link>
                 </div>
             </div>
 
