@@ -1,23 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-export const dynamic = 'force-dynamic';
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password, role, firstName, lastName, phone } = body;
+        const {
+            email,
+            password,
+            firstName,
+            lastName,
+            phone,
+            role,
+            region,
+            interests,
+            companyName,
+            businessNumber,
+        } = body;
 
-        // Validation
-        if (!email || !password || !firstName || !lastName) {
-            return NextResponse.json(
-                { error: '필수 정보를 모두 입력해주세요.' },
-                { status: 400 }
-            );
-        }
-
-        // Check if user already exists
+        // Check if user exists
         const existingUser = await prisma.user.findUnique({
             where: { email },
         });
@@ -30,9 +31,9 @@ export async function POST(request: NextRequest) {
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Create user with profile
+        // Create user
         const user = await prisma.user.create({
             data: {
                 email,
@@ -43,39 +44,40 @@ export async function POST(request: NextRequest) {
                     create: {
                         firstName,
                         lastName,
+                        region,
+                        interests: interests || [],
                     },
                 },
+                ...(role === 'BUSINESS' && {
+                    businessProfile: {
+                        create: {
+                            companyName: companyName || '',
+                            businessNumber,
+                            categories: interests || [],
+                            serviceAreas: region ? [region] : [],
+                            portfolioImages: [],
+                        },
+                    },
+                }),
             },
             include: {
                 profile: true,
+                businessProfile: true,
             },
         });
 
-        // Create business profile if role is BUSINESS
-        if (role === 'BUSINESS') {
-            await prisma.businessProfile.create({
-                data: {
-                    userId: user.id,
-                    companyName: `${firstName} ${lastName}`,
-                },
-            });
-        }
-
-        return NextResponse.json(
-            {
-                message: '회원가입이 완료되었습니다.',
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role,
-                },
+        return NextResponse.json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
             },
-            { status: 201 }
-        );
+        });
     } catch (error) {
         console.error('Registration error:', error);
         return NextResponse.json(
-            { error: '회원가입 중 오류가 발생했습니다.' },
+            { error: '회원가입 처리 중 오류가 발생했습니다.' },
             { status: 500 }
         );
     }

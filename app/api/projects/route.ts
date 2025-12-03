@@ -1,57 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { ProjectStatus, Prisma } from '@prisma/client';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
-        }
-
         const { searchParams } = new URL(request.url);
         const category = searchParams.get('category');
-        const status = searchParams.get('status');
+        const location = searchParams.get('location');
+        const status = searchParams.get('status') || 'OPEN';
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '20');
 
-        const where: any = {};
+        const where: Prisma.ProjectWhereInput = {
+            ...(status && { status: status as ProjectStatus }),
+            ...(category && { category }),
+            ...(location && { location }),
+        };
 
-        if (session.user.role === 'USER') {
-            where.userId = session.user.id;
-        }
-
-        if (category) {
-            where.category = category;
-        }
-
-        if (status) {
-            where.status = status;
-        }
-
-        const projects = await prisma.project.findMany({
-            where,
-            include: {
-                user: {
-                    include: {
-                        profile: true,
+        const [projects, total] = await Promise.all([
+            prisma.project.findMany({
+                where,
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            proposals: true,
+                        },
                     },
                 },
-                _count: {
-                    select: {
-                        proposals: true,
-                    },
+                orderBy: {
+                    createdAt: 'desc',
                 },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
+                skip: (page - 1) * limit,
+                take: limit,
+            }),
+            prisma.project.count({ where }),
+        ]);
+
+        return NextResponse.json({
+            items: projects,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
         });
-
-        return NextResponse.json({ projects });
     } catch (error) {
-        console.error('Get projects error:', error);
+        console.error('Error fetching projects:', error);
         return NextResponse.json(
             { error: '프로젝트 조회 중 오류가 발생했습니다.' },
             { status: 500 }
@@ -59,31 +59,32 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
+
         if (!session) {
-            return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
-        }
-
-        const body = await request.json();
-        const {
-            title,
-            description,
-            category,
-            location,
-            budgetMin,
-            budgetMax,
-            deadline,
-            images,
-        } = body;
-
-        if (!title || !description || !category || !location) {
             return NextResponse.json(
-                { error: '필수 정보를 모두 입력해주세요.' },
-                { status: 400 }
+                { error: '로그인이 필요합니다.' },
+                { status: 401 }
             );
         }
+
+        const formData = await request.formData();
+        const title = formData.get('title') as string;
+        const description = formData.get('description') as string;
+        const category = formData.get('category') as string;
+        const location = formData.get('location') as string;
+        const budgetMin = parseInt(formData.get('budgetMin') as string) || null;
+        const budgetMax = parseInt(formData.get('budgetMax') as string) || null;
+        const deadline = formData.get('deadline') as string;
+
+        // Handle file uploads (placeholder - implement actual file upload logic)
+        const images: string[] = [];
+        const attachments: string[] = [];
+
+        // For now, skip file processing in build
+        // In production, integrate with cloud storage (S3, Cloudinary, etc.)
 
         const project = await prisma.project.create({
             data: {
@@ -92,29 +93,19 @@ export async function POST(request: NextRequest) {
                 description,
                 category,
                 location,
-                budgetMin: budgetMin ? parseInt(budgetMin) : null,
-                budgetMax: budgetMax ? parseInt(budgetMax) : null,
+                budgetMin,
+                budgetMax,
                 deadline: deadline ? new Date(deadline) : null,
-                images: images || [],
-                status: 'OPEN',
-            },
-            include: {
-                user: {
-                    include: {
-                        profile: true,
-                    },
-                },
+                images,
+                attachments,
             },
         });
 
-        // Create notification for matching businesses (simplified)
-        // In production, you'd want to match based on category and location
-
-        return NextResponse.json({ project }, { status: 201 });
+        return NextResponse.json(project, { status: 201 });
     } catch (error) {
-        console.error('Create project error:', error);
+        console.error('Error creating project:', error);
         return NextResponse.json(
-            { error: '프로젝트 등록 중 오류가 발생했습니다.' },
+            { error: '프로젝트 생성 중 오류가 발생했습니다.' },
             { status: 500 }
         );
     }

@@ -50,17 +50,18 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
-  profile         UserProfile?
-  businessProfile BusinessProfile?
-  projects        Project[]
-  proposals       Proposal[]
-  contracts       Contract[]
-  messages        Message[]
-  notifications   Notification[]
-  reviews         Review[]
-  receivedReviews Review[]       @relation("ReceivedReviews")
-  accounts        Account[]
-  sessions        Session[]
+  profile           UserProfile?
+  businessProfile   BusinessProfile?
+  projects          Project[]
+  proposals         Proposal[]
+  contracts         Contract[]
+  businessContracts Contract[]     @relation("BusinessContracts")
+  messages          Message[]
+  notifications     Notification[]
+  reviews           Review[]
+  receivedReviews   Review[]       @relation("ReceivedReviews")
+  accounts          Account[]
+  sessions          Session[]
   
   @@index([email])
 }
@@ -182,16 +183,24 @@ model Project {
   @@index([category])
 }
 
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
 model Proposal {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   projectId   String
   businessId  String
   amount      Int
-  description String   @db.Text
+  description String         @db.Text
   timeline    String?
-  attachments String[] // Array of file URLs
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  attachments String[]       // Array of file URLs
+  status      ProposalStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   
   project  Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   business User       @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -199,6 +208,7 @@ model Proposal {
   
   @@index([projectId])
   @@index([businessId])
+  @@index([status])
 }
 
 model Contract {
@@ -218,6 +228,7 @@ model Contract {
   project  Project  @relation(fields: [projectId], references: [id])
   proposal Proposal @relation(fields: [proposalId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
+  business User     @relation("BusinessContracts", fields: [businessId], references: [id])
   review   Review?
   
   @@index([userId])

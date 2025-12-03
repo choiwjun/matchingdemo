@@ -1,290 +1,336 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { Button, Input, Select, Textarea, FileUpload } from '@/components/ui';
+import { CATEGORIES, REGIONS, BUDGET_RANGES } from '@/lib/constants';
 
-const CATEGORIES = [
-    { id: 'construction', name: '건설/인테리어' },
-    { id: 'cleaning', name: '청소/정리' },
-    { id: 'moving', name: '이사/운송' },
-    { id: 'repair', name: '수리/설치' },
-    { id: 'design', name: '디자인' },
-    { id: 'it', name: 'IT/개발' },
-    { id: 'education', name: '교육/과외' },
-    { id: 'event', name: '행사/이벤트' },
-    { id: 'other', name: '기타' },
-];
+interface ProjectFormData {
+    title: string;
+    description: string;
+    category: string;
+    location: string;
+    address: string;
+    budgetRange: string;
+    budgetMin?: number;
+    budgetMax?: number;
+    deadline: string;
+    requirements: string;
+}
 
 export default function NewProjectPage() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        category: '',
-        location: '',
-        budgetMin: '',
-        budgetMax: '',
-        deadline: '',
-    });
     const [images, setImages] = useState<File[]>([]);
+    const [attachments, setAttachments] = useState<File[]>([]);
+    const [step, setStep] = useState(1);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value,
-        }));
-    };
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<ProjectFormData>();
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setImages(Array.from(e.target.files));
-        }
-    };
+    const budgetRange = watch('budgetRange');
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSubmit = async (data: ProjectFormData) => {
+        setIsLoading(true);
         setError('');
-        setLoading(true);
 
         try {
-            // Upload images first if any
-            const imageUrls: string[] = [];
-            if (images.length > 0) {
-                const formData = new FormData();
-                images.forEach(image => formData.append('files', image));
+            // Find budget range values
+            const selectedBudget = BUDGET_RANGES.find(b => b.id === data.budgetRange);
+            
+            const formData = new FormData();
+            formData.append('title', data.title);
+            formData.append('description', data.description);
+            formData.append('category', data.category);
+            formData.append('location', data.location);
+            formData.append('address', data.address || '');
+            formData.append('budgetMin', String(selectedBudget?.min || 0));
+            formData.append('budgetMax', String(selectedBudget?.max || 0));
+            formData.append('deadline', data.deadline || '');
+            formData.append('requirements', data.requirements || '');
 
-                const uploadRes = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
+            images.forEach((image) => {
+                formData.append('images', image);
+            });
 
-                if (uploadRes.ok) {
-                    const { urls } = await uploadRes.json();
-                    imageUrls.push(...urls);
-                }
-            }
+            attachments.forEach((file) => {
+                formData.append('attachments', file);
+            });
 
-            // Create project
             const response = await fetch('/api/projects', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    budgetMin: formData.budgetMin ? parseInt(formData.budgetMin) : null,
-                    budgetMax: formData.budgetMax ? parseInt(formData.budgetMax) : null,
-                    images: imageUrls,
-                }),
+                body: formData,
             });
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || '프로젝트 등록에 실패했습니다.');
+                const result = await response.json();
+                throw new Error(result.error || '프로젝트 등록에 실패했습니다.');
             }
 
-            const { project } = await response.json();
-            router.push(`/dashboard/projects/${project.id}`);
-        } catch (err: any) {
-            setError(err.message);
+            router.push('/dashboard/projects?created=true');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-3xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">새 프로젝트 등록</h1>
-                <p className="text-gray-600 mt-2">프로젝트 정보를 입력하고 전문가의 제안을 받아보세요.</p>
-            </div>
-
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                    {error}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="card space-y-6">
-                <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                        프로젝트 제목 *
-                    </label>
-                    <input
-                        id="title"
-                        name="title"
-                        type="text"
-                        value={formData.title}
-                        onChange={handleChange}
-                        className="input"
-                        placeholder="예: 아파트 거실 인테리어"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                        카테고리 *
-                    </label>
-                    <select
-                        id="category"
-                        name="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        className="input"
-                        required
-                    >
-                        <option value="">카테고리 선택</option>
-                        {CATEGORIES.map(cat => (
-                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                        상세 설명 *
-                    </label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="input min-h-[150px]"
-                        placeholder="프로젝트에 대해 자세히 설명해주세요..."
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                        작업 위치 *
-                    </label>
-                    <input
-                        id="location"
-                        name="location"
-                        type="text"
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="input"
-                        placeholder="예: 서울시 강남구"
-                        required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                        정확한 주소는 계약 후 공유됩니다.
-                    </p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="budgetMin" className="block text-sm font-medium text-gray-700 mb-1">
-                            최소 예산 (원)
-                        </label>
-                        <input
-                            id="budgetMin"
-                            name="budgetMin"
-                            type="number"
-                            value={formData.budgetMin}
-                            onChange={handleChange}
-                            className="input"
-                            placeholder="500000"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="budgetMax" className="block text-sm font-medium text-gray-700 mb-1">
-                            최대 예산 (원)
-                        </label>
-                        <input
-                            id="budgetMax"
-                            name="budgetMax"
-                            type="number"
-                            value={formData.budgetMax}
-                            onChange={handleChange}
-                            className="input"
-                            placeholder="1000000"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-1">
-                        제안 마감일
-                    </label>
-                    <input
-                        id="deadline"
-                        name="deadline"
-                        type="date"
-                        value={formData.deadline}
-                        onChange={handleChange}
-                        className="input"
-                        min={new Date().toISOString().split('T')[0]}
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="images" className="block text-sm font-medium text-gray-700 mb-1">
-                        참고 이미지
-                    </label>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary-400 transition-colors">
-                        <div className="space-y-1 text-center">
-                            <svg
-                                className="mx-auto h-12 w-12 text-gray-400"
-                                stroke="currentColor"
-                                fill="none"
-                                viewBox="0 0 48 48"
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b sticky top-0 z-10">
+                <div className="container mx-auto px-4">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => router.back()}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                <path
-                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                    strokeWidth={2}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                            <div className="flex text-sm text-gray-600">
-                                <label
-                                    htmlFor="images"
-                                    className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500"
-                                >
-                                    <span>파일 업로드</span>
-                                    <input
-                                        id="images"
-                                        name="images"
-                                        type="file"
-                                        className="sr-only"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                    />
-                                </label>
-                                <p className="pl-1">또는 드래그 앤 드롭</p>
-                            </div>
-                            <p className="text-xs text-gray-500">PNG, JPG, GIF (최대 10MB)</p>
-                            {images.length > 0 && (
-                                <p className="text-sm text-primary-600 font-medium">
-                                    {images.length}개 파일 선택됨
-                                </p>
-                            )}
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <h1 className="text-xl font-bold text-gray-900">새 프로젝트 등록</h1>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex gap-4 pt-4">
-                    <button
-                        type="button"
-                        onClick={() => router.back()}
-                        className="btn btn-secondary flex-1"
-                    >
-                        취소
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn btn-primary flex-1"
-                    >
-                        {loading ? '등록 중...' : '프로젝트 등록'}
-                    </button>
+            <main className="container mx-auto px-4 py-8 max-w-3xl">
+                {/* Progress Steps */}
+                <div className="flex items-center justify-center mb-8">
+                    {['기본 정보', '상세 내용', '파일 업로드'].map((label, index) => (
+                        <React.Fragment key={index}>
+                            <div className="flex flex-col items-center">
+                                <div
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center font-medium ${
+                                        step > index + 1
+                                            ? 'bg-green-500 text-white'
+                                            : step === index + 1
+                                            ? 'bg-primary-600 text-white'
+                                            : 'bg-gray-200 text-gray-500'
+                                    }`}
+                                >
+                                    {step > index + 1 ? (
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    ) : (
+                                        index + 1
+                                    )}
+                                </div>
+                                <span className="text-xs mt-2 text-gray-600">{label}</span>
+                            </div>
+                            {index < 2 && (
+                                <div
+                                    className={`w-20 h-1 mx-2 ${
+                                        step > index + 1 ? 'bg-green-500' : 'bg-gray-200'
+                                    }`}
+                                />
+                            )}
+                        </React.Fragment>
+                    ))}
                 </div>
-            </form>
+
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {/* Step 1: Basic Info */}
+                        {step === 1 && (
+                            <div className="space-y-6">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h2>
+
+                                <Input
+                                    label="프로젝트 제목"
+                                    placeholder="예: 아파트 인테리어 리모델링"
+                                    {...register('title', {
+                                        required: '제목을 입력해주세요.',
+                                        maxLength: {
+                                            value: 100,
+                                            message: '제목은 100자 이내로 입력해주세요.',
+                                        },
+                                    })}
+                                    error={errors.title?.message}
+                                />
+
+                                <Select
+                                    label="카테고리"
+                                    options={CATEGORIES.map((c) => ({
+                                        value: c.id,
+                                        label: `${c.icon} ${c.nameKo}`,
+                                    }))}
+                                    placeholder="카테고리를 선택하세요"
+                                    {...register('category', {
+                                        required: '카테고리를 선택해주세요.',
+                                    })}
+                                    error={errors.category?.message}
+                                />
+
+                                <Select
+                                    label="지역"
+                                    options={REGIONS.map((r) => ({
+                                        value: r.id,
+                                        label: r.name,
+                                    }))}
+                                    placeholder="지역을 선택하세요"
+                                    {...register('location', {
+                                        required: '지역을 선택해주세요.',
+                                    })}
+                                    error={errors.location?.message}
+                                />
+
+                                <Input
+                                    label="상세 주소"
+                                    placeholder="정확한 주소를 입력하세요 (선택)"
+                                    {...register('address')}
+                                    helperText="상세 주소는 매칭 후 공개됩니다."
+                                />
+
+                                <div className="flex justify-end">
+                                    <Button type="button" onClick={() => setStep(2)}>
+                                        다음
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 2: Details */}
+                        {step === 2 && (
+                            <div className="space-y-6">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">상세 내용</h2>
+
+                                <Textarea
+                                    label="프로젝트 설명"
+                                    placeholder="작업 내용을 자세히 설명해주세요. 더 정확한 견적을 받을 수 있습니다."
+                                    rows={5}
+                                    {...register('description', {
+                                        required: '설명을 입력해주세요.',
+                                        minLength: {
+                                            value: 20,
+                                            message: '20자 이상 입력해주세요.',
+                                        },
+                                    })}
+                                    error={errors.description?.message}
+                                    showCount
+                                    maxLength={2000}
+                                />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                        예산 범위
+                                    </label>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        {BUDGET_RANGES.map((range) => (
+                                            <label
+                                                key={range.id}
+                                                className={`relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                                    budgetRange === range.id
+                                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    value={range.id}
+                                                    {...register('budgetRange', {
+                                                        required: '예산 범위를 선택해주세요.',
+                                                    })}
+                                                    className="sr-only"
+                                                />
+                                                <span className="text-sm font-medium">{range.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {errors.budgetRange && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.budgetRange.message}</p>
+                                    )}
+                                </div>
+
+                                <Input
+                                    label="마감일"
+                                    type="date"
+                                    {...register('deadline')}
+                                    helperText="제안을 받고 싶은 마감일을 설정하세요. (선택)"
+                                />
+
+                                <Textarea
+                                    label="추가 요구사항"
+                                    placeholder="특별히 원하시는 조건이나 요구사항을 입력하세요. (선택)"
+                                    rows={3}
+                                    {...register('requirements')}
+                                />
+
+                                <div className="flex gap-3 justify-between">
+                                    <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                                        이전
+                                    </Button>
+                                    <Button type="button" onClick={() => setStep(3)}>
+                                        다음
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: File Upload */}
+                        {step === 3 && (
+                            <div className="space-y-6">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">파일 업로드</h2>
+
+                                <FileUpload
+                                    label="사진 업로드"
+                                    accept={['image/jpeg', 'image/png', 'image/gif', 'image/webp']}
+                                    maxFiles={10}
+                                    maxSize={5 * 1024 * 1024}
+                                    value={images}
+                                    onChange={setImages}
+                                    helperText="작업 현장이나 관련 사진을 업로드하세요. (최대 10장)"
+                                    previewType="image"
+                                />
+
+                                <FileUpload
+                                    label="첨부파일"
+                                    accept={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                                    maxFiles={5}
+                                    maxSize={10 * 1024 * 1024}
+                                    value={attachments}
+                                    onChange={setAttachments}
+                                    helperText="도면, 견적서 등 관련 문서를 업로드하세요. (최대 5개)"
+                                    previewType="file"
+                                />
+
+                                <div className="bg-blue-50 rounded-lg p-4">
+                                    <h3 className="font-medium text-blue-900 mb-2">등록 안내</h3>
+                                    <ul className="text-sm text-blue-800 space-y-1">
+                                        <li>• 프로젝트가 등록되면 관련 사업자들에게 알림이 발송됩니다.</li>
+                                        <li>• 사업자들의 제안을 검토하고 원하는 사업자를 선택할 수 있습니다.</li>
+                                        <li>• 개인정보는 매칭 후 상대방에게만 공개됩니다.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="flex gap-3 justify-between">
+                                    <Button type="button" variant="outline" onClick={() => setStep(2)}>
+                                        이전
+                                    </Button>
+                                    <Button type="submit" isLoading={isLoading}>
+                                        프로젝트 등록
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </form>
+                </div>
+            </main>
         </div>
     );
 }
