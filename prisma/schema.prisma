@@ -1,0 +1,316 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  BUSINESS
+  ADMIN
+}
+
+enum ProjectStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ContractStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  NEW_PROPOSAL
+  NEW_MESSAGE
+  CONTRACT_CONFIRMED
+  CONTRACT_COMPLETED
+  REVIEW_REQUEST
+  SYSTEM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  phone         String?
+  phoneVerified Boolean   @default(false)
+  password      String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  profile         UserProfile?
+  businessProfile BusinessProfile?
+  projects        Project[]
+  proposals       Proposal[]
+  contracts       Contract[]
+  messages        Message[]
+  notifications   Notification[]
+  reviews         Review[]
+  receivedReviews Review[]       @relation("ReceivedReviews")
+  accounts        Account[]
+  sessions        Session[]
+  
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  firstName String
+  lastName  String
+  avatar    String?
+  region    String?
+  address   String?
+  interests String[] // Array of category IDs
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  companyName      String
+  businessNumber   String?
+  certificate      String? // URL to certificate file
+  description      String?  @db.Text
+  logo             String?
+  serviceAreas     String[] // Array of regions
+  categories       String[] // Array of category IDs
+  portfolioImages  String[] // Array of image URLs
+  priceRange       String?
+  verified         Boolean  @default(false)
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([verified])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  nameKo      String
+  description String?
+  icon        String?
+  parentId    String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  
+  @@index([parentId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  userId      String
+  title       String
+  description String        @db.Text
+  category    String
+  location    String
+  latitude    Float?
+  longitude   Float?
+  budgetMin   Int?
+  budgetMax   Int?
+  images      String[] // Array of image URLs
+  attachments String[] // Array of file URLs
+  deadline    DateTime?
+  status      ProjectStatus @default(OPEN)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposals Proposal[]
+  contracts Contract[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+}
+
+model Proposal {
+  id          String   @id @default(cuid())
+  projectId   String
+  businessId  String
+  amount      Int
+  description String   @db.Text
+  timeline    String?
+  attachments String[] // Array of file URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  project  Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  business User       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contract Contract?
+  
+  @@index([projectId])
+  @@index([businessId])
+}
+
+model Contract {
+  id         String         @id @default(cuid())
+  projectId  String
+  proposalId String         @unique
+  userId     String
+  businessId String
+  amount     Int
+  status     ContractStatus @default(PENDING)
+  startDate  DateTime?
+  endDate    DateTime?
+  pdfUrl     String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  
+  project  Project  @relation(fields: [projectId], references: [id])
+  proposal Proposal @relation(fields: [proposalId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  review   Review?
+  
+  @@index([userId])
+  @@index([businessId])
+  @@index([status])
+}
+
+model ChatRoom {
+  id        String    @id @default(cuid())
+  userIds   String[] // Array of user IDs in the room
+  lastMessageAt DateTime?
+  createdAt DateTime  @default(now())
+  
+  messages Message[]
+  
+  @@index([userIds])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  roomId     String
+  senderId   String
+  content    String   @db.Text
+  fileUrl    String?
+  fileName   String?
+  fileSize   Int?
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation(fields: [senderId], references: [id])
+  
+  @@index([roomId])
+  @@index([senderId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([read])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  contractId String   @unique
+  reviewerId String
+  revieweeId String
+  rating     Int // 1-5 stars
+  comment    String?  @db.Text
+  images     String[] // Array of image URLs
+  createdAt  DateTime @default(now())
+  
+  contract Contract @relation(fields: [contractId], references: [id])
+  reviewer User     @relation(fields: [reviewerId], references: [id])
+  reviewee User     @relation("ReceivedReviews", fields: [revieweeId], references: [id])
+  
+  @@index([revieweeId])
+}
+
+model Content {
+  id        String   @id @default(cuid())
+  type      String // 'announcement', 'faq', 'banner'
+  title     String
+  content   String   @db.Text
+  imageUrl  String?
+  link      String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([type])
+  @@index([active])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  reporterId  String
+  reportedId  String
+  reason      String
+  description String?  @db.Text
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  @@index([resolved])
+}

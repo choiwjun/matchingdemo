@@ -1,0 +1,41 @@
+{
+  "name": "marketplace-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@prisma/client": "^5.22.0",
+    "next-auth": "^4.24.10",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "bcryptjs": "^2.4.3",
+    "zod": "^3.23.8",
+    "date-fns": "^4.1.0",
+    "react-hook-form": "^7.54.0",
+    "react-dropzone": "^14.3.5",
+    "@tanstack/react-query": "^5.62.7",
+    "axios": "^1.7.9",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/bcryptjs": "^2.4.6",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.18",
+    "prisma": "^5.22.0"
+  }
+}
