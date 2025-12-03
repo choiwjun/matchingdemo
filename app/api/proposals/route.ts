@@ -111,7 +111,7 @@ export async function POST(request: Request) {
                 amount,
                 description,
                 timeline,
-                attachments: [],
+                attachments: JSON.stringify([]),
             },
         });
 

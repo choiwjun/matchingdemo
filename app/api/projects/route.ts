@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { ProjectStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { ProjectStatus } from '@/lib/types';
 
 export async function GET(request: Request) {
     try {
@@ -96,8 +97,8 @@ export async function POST(request: Request) {
                 budgetMin,
                 budgetMax,
                 deadline: deadline ? new Date(deadline) : null,
-                images,
-                attachments,
+                images: JSON.stringify(images),
+                attachments: JSON.stringify(attachments),
             },
         });
 
