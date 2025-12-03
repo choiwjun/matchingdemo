@@ -7,7 +7,14 @@ export default async function BusinessLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const session = await getServerSession(authOptions);
+    let session;
+    
+    try {
+        session = await getServerSession(authOptions);
+    } catch (error) {
+        console.error('Session error in business layout:', error);
+        redirect('/auth/login?error=session');
+    }
 
     if (!session) {
         redirect('/auth/login');
