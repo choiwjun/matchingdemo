@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CATEGORIES, REGIONS, PROJECT_STATUS_LABELS, BUDGET_RANGES, SORT_OPTIONS } from '@/lib/constants';
 
@@ -112,12 +113,20 @@ const sampleProjects = [
     },
 ];
 
-export default function ProjectsPage() {
+function ProjectsPageContent() {
+    const searchParams = useSearchParams();
+    const categoryFromUrl = searchParams.get('category') || '';
+    
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
     const [selectedRegion, setSelectedRegion] = useState('');
     const [selectedBudget, setSelectedBudget] = useState('');
     const [sortBy, setSortBy] = useState('createdAt-desc');
+
+    // Update category when URL changes
+    useEffect(() => {
+        setSelectedCategory(categoryFromUrl);
+    }, [categoryFromUrl]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('ja-JP', {
@@ -409,5 +418,26 @@ export default function ProjectsPage() {
                 </div>
             </footer>
         </div>
+    );
+}
+
+// Loading fallback for Suspense
+function ProjectsLoading() {
+    return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">案件を読み込み中...</p>
+            </div>
+        </div>
+    );
+}
+
+// Default export wrapped in Suspense for useSearchParams
+export default function ProjectsPage() {
+    return (
+        <Suspense fallback={<ProjectsLoading />}>
+            <ProjectsPageContent />
+        </Suspense>
     );
 }
