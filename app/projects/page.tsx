@@ -328,7 +328,7 @@ function ProjectsPageContent() {
                                     return (
                                         <Link
                                             key={project.id}
-                                            href={`/business/projects/${project.id}`}
+                                            href={`/projects/${project.id}`}
                                             className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                                         >
                                             <div className="p-6">
