@@ -17,6 +17,43 @@ export const authOptions: NextAuthOptions = {
                     throw new Error('이메일과 비밀번호를 입력해주세요.');
                 }
 
+                // Demo User Logic
+                if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
+                    try {
+                        let user = await prisma.user.findUnique({
+                            where: { email: 'demo@example.com' },
+                        });
+
+                        if (!user) {
+                            const hashedPassword = await bcrypt.hash('demo', 12);
+                            user = await prisma.user.create({
+                                data: {
+                                    email: 'demo@example.com',
+                                    password: hashedPassword,
+                                    role: 'USER',
+                                    profile: {
+                                        create: {
+                                            firstName: 'Demo',
+                                            lastName: 'User',
+                                            region: 'tokyo',
+                                            interests: '[]',
+                                        },
+                                    },
+                                },
+                            });
+                        }
+
+                        return {
+                            id: user.id,
+                            email: user.email,
+                            role: user.role,
+                        };
+                    } catch (error) {
+                        console.error('Demo login error:', error);
+                        // Fallback to normal login flow if DB fails (though likely will fail there too)
+                    }
+                }
+
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email },
                     include: {

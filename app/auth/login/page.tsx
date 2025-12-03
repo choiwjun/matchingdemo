@@ -122,6 +122,26 @@ function LoginForm() {
                         </Button>
                     </form>
 
+                    {/* Demo Login */}
+                    <div className="mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            fullWidth
+                            onClick={async () => {
+                                setIsLoading(true);
+                                await signIn('credentials', {
+                                    email: 'demo@example.com',
+                                    password: 'demo',
+                                    callbackUrl,
+                                });
+                            }}
+                            className="border-primary-600 text-primary-600 hover:bg-primary-50"
+                        >
+                            デモアカウントでログイン (入力不要)
+                        </Button>
+                    </div>
+
                     {/* Social Login */}
                     <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center">
