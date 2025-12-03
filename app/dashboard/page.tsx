@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
 
@@ -134,8 +136,8 @@ export default async function DashboardPage() {
                                                 {new Date(project.createdAt).toLocaleDateString('ko-KR')}
                                             </span>
                                             <span className={`badge ${project.status === 'OPEN' ? 'badge-primary' :
-                                                    project.status === 'IN_PROGRESS' ? 'badge-warning' :
-                                                        project.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'
+                                                project.status === 'IN_PROGRESS' ? 'badge-warning' :
+                                                    project.status === 'COMPLETED' ? 'badge-success' : 'badge-danger'
                                                 }`}>
                                                 {project.status === 'OPEN' ? '모집 중' :
                                                     project.status === 'IN_PROGRESS' ? '진행 중' :

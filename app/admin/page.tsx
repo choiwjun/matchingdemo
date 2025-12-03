@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
     const stats = await Promise.all([
         prisma.user.count(),
@@ -150,7 +152,7 @@ export default async function AdminDashboardPage() {
                                             </td>
                                             <td className="py-3 px-4 text-sm">
                                                 <span className={`badge ${user.role === 'ADMIN' ? 'badge-danger' :
-                                                        user.role === 'BUSINESS' ? 'badge-primary' : 'badge-success'
+                                                    user.role === 'BUSINESS' ? 'badge-primary' : 'badge-success'
                                                     }`}>
                                                     {user.role}
                                                 </span>
@@ -185,7 +187,7 @@ export default async function AdminDashboardPage() {
                                             <div className="flex items-center gap-3 mt-2">
                                                 <span className="badge badge-primary">{project.category}</span>
                                                 <span className={`badge ${project.status === 'OPEN' ? 'badge-success' :
-                                                        project.status === 'IN_PROGRESS' ? 'badge-warning' : 'badge-danger'
+                                                    project.status === 'IN_PROGRESS' ? 'badge-warning' : 'badge-danger'
                                                     }`}>
                                                     {project.status}
                                                 </span>
