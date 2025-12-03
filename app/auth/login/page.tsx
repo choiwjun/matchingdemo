@@ -130,11 +130,27 @@ function LoginForm() {
                             fullWidth
                             onClick={async () => {
                                 setIsLoading(true);
-                                await signIn('credentials', {
-                                    email: 'demo@example.com',
-                                    password: 'demo',
-                                    callbackUrl,
-                                });
+                                setError('');
+                                try {
+                                    const result = await signIn('credentials', {
+                                        email: 'demo@example.com',
+                                        password: 'demo',
+                                        redirect: false,
+                                        callbackUrl,
+                                    });
+
+                                    if (result?.error) {
+                                        setError('デモログインに失敗しました。データベース接続を確認してください。');
+                                    } else {
+                                        router.push(callbackUrl);
+                                        router.refresh();
+                                    }
+                                } catch (e) {
+                                    setError('予期せぬエラーが発生しました。');
+                                    console.error(e);
+                                } finally {
+                                    setIsLoading(false);
+                                }
                             }}
                             className="border-primary-600 text-primary-600 hover:bg-primary-50"
                         >
