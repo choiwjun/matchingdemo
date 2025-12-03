@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { ProjectStatus, NotificationType } from '@/lib/types';
 
 export async function GET(request: Request) {
     try {
@@ -38,9 +39,19 @@ export async function GET(request: Request) {
 
         return NextResponse.json(proposals);
     } catch (error) {
-        console.error('Error fetching proposals:', error);
+        console.error('❌ Error fetching proposals:', error);
+        console.error('Error details:', {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : 'No stack trace',
+        });
         return NextResponse.json(
-            { error: '제안 조회 중 오류가 발생했습니다.' },
+            {
+                error: '제안 조회 중 오류가 발생했습니다.',
+                details: process.env.NODE_ENV === 'development' && error instanceof Error
+                    ? error.message
+                    : undefined
+            },
             { status: 500 }
         );
     }
@@ -82,7 +93,7 @@ export async function POST(request: Request) {
             );
         }
 
-        if (project.status !== 'OPEN') {
+        if (project.status !== ProjectStatus.OPEN) {
             return NextResponse.json(
                 { error: '이 프로젝트는 더 이상 제안을 받지 않습니다.' },
                 { status: 400 }
@@ -119,7 +130,7 @@ export async function POST(request: Request) {
         await prisma.notification.create({
             data: {
                 userId: project.userId,
-                type: 'NEW_PROPOSAL',
+                type: NotificationType.NEW_PROPOSAL,
                 title: '새로운 제안이 도착했습니다',
                 message: `"${project.title}" 프로젝트에 새로운 제안이 도착했습니다.`,
                 link: `/dashboard/projects/${projectId}`,

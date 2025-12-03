@@ -10,7 +10,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const category = searchParams.get('category');
         const location = searchParams.get('location');
-        const status = searchParams.get('status') || 'OPEN';
+        const status = searchParams.get('status') || ProjectStatus.OPEN;
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '20');
 
@@ -52,9 +52,19 @@ export async function GET(request: Request) {
             totalPages: Math.ceil(total / limit),
         });
     } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error('❌ Error fetching projects:', error);
+        console.error('Error details:', {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : 'No stack trace',
+        });
         return NextResponse.json(
-            { error: '프로젝트 조회 중 오류가 발생했습니다.' },
+            {
+                error: '프로젝트 조회 중 오류가 발생했습니다.',
+                details: process.env.NODE_ENV === 'development' && error instanceof Error
+                    ? error.message
+                    : undefined
+            },
             { status: 500 }
         );
     }
@@ -104,9 +114,19 @@ export async function POST(request: Request) {
 
         return NextResponse.json(project, { status: 201 });
     } catch (error) {
-        console.error('Error creating project:', error);
+        console.error('❌ Error creating project:', error);
+        console.error('Error details:', {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : 'No stack trace',
+        });
         return NextResponse.json(
-            { error: '프로젝트 생성 중 오류가 발생했습니다.' },
+            {
+                error: '프로젝트 생성 중 오류가 발생했습니다.',
+                details: process.env.NODE_ENV === 'development' && error instanceof Error
+                    ? error.message
+                    : undefined
+            },
             { status: 500 }
         );
     }
